@@ -1,0 +1,76 @@
+# 项目启动端口
+server:
+  port: 8080
+  host: 127.0.0.1
+  model: debug
+
+db:
+  dialects: mysql
+  # dsn: root:admin1234@tcp(127.0.0.1:3306)/go_vue_general_admin?charset=utf8mb4&parseTime=True&loc=Local
+  host: 127.0.0.1
+  port: 3306
+  db: go_vue_general_admin
+  username: root
+  password: admin1234
+  charset: utf8mb4
+  # 高性能连接池配置
+  maxIdleConns: 50        # 最多空闲连接数（提升到50）
+  maxOpenConns: 200       # 最多打开连接数（提升到200）
+  setConnMaxLifetime: 3600 # 连接最大生存时间（1小时）
+  connMaxIdleTime: 1800   # 连接最大空闲时间（30分钟）
+  # 数据库性能优化
+  slowThreshold: 200      # 慢查询阈值（毫秒）
+  logLevel: 1             # 日志级别：1=Silent, 2=Error, 3=Warn, 4=Info
+  prepareStmt: true       # 启用预编译语句缓存
+  # 读写分离配置（可选）
+  readReplicas:
+    enabled: false
+    hosts: []
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+
+# RabbitMQ配置
+rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+  vhost: /
+  # 连接池配置
+  maxConnections: 10
+  maxChannels: 100
+  # 重连配置
+  reconnectDelay: 5s
+  maxReconnectAttempts: 10
+
+# 图片地址和ip
+imageSettings:
+# 本地磁盘地址
+  uploadDir: ./upload/
+  # 本地ip地址（线上地址可以更换）
+  imageHost: http://localhost:2000
+
+# log日志配置
+log:
+  path: ./logs
+  name: sys
+  # 输出控制台
+  # model: console
+  # 同时输出到控制台和文件
+  model: file
+  # 日志文件最大尺寸（M），超过最大大尺寸时，会自动分割 
+  maxSize: 1
+  # 保留文件的最大个数
+  maxBackups: 10
+  # 保留文件最大天数
+  maxAge: 90
+
+jwt:
+# token过期时间，单位：分钟
+  expire: 120
+  secret: jimijimi
+
+ansible:

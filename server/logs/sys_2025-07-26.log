@@ -1,0 +1,4 @@
+time="2025-07-26 00:55:49" level=info msg="Listening and serving HTTP on 127.0.0.1:8080"
+time="2025-07-26 00:55:55" level=info msg="Shutdown Server ..."
+time="2025-07-26 00:55:55" level=info msg="Server exiting"
+time="2025-07-26 20:03:01" level=info msg="Listening and serving HTTP on 127.0.0.1:8080"
