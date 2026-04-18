@@ -15,18 +15,11 @@ export class AuthUtils {
     const token = storage.getItem('token')
     const sysAdmin = storage.getItem('sysAdmin')
 
-    console.log('检查认证状态:', { token: token ? `${token.substring(0, 20)}...` : null, sysAdmin: !!sysAdmin })
-
-    // 检查 token 和用户信息是否存在
     if (!token || !sysAdmin) {
-      console.log('Token 或用户信息不存在')
       return false
     }
 
-    // 暂时跳过 JWT 过期检查，让后端来验证 token 有效性
-    // 这样可以避免前端解析 token 时的格式问题
-    console.log('认证检查通过（跳过过期检查）')
-    return true
+    return !this.isTokenExpired(token)
   }
   
   /**
@@ -36,42 +29,28 @@ export class AuthUtils {
    */
   static isTokenExpired(token: string): boolean {
     try {
-      // 检查 token 格式
       if (!token || typeof token !== 'string') {
-        console.log('Token 为空或格式错误')
         return true
       }
 
-      // 检查是否是 JWT 格式 (应该有3个部分，用.分隔)
       const parts = token.split('.')
       if (parts.length !== 3) {
-        console.log('Token 不是标准的 JWT 格式，跳过过期检查:', token.substring(0, 50) + '...')
-        // 对于非 JWT token，我们假设它是有效的，让后端来验证
-        return false
+        return true
       }
 
-      // 解析 JWT token
-      const payload = JSON.parse(atob(parts[1]))
+      // Base64URL 解码 payload
+      const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+      const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
+      const payload = JSON.parse(atob(padded))
       const currentTime = Math.floor(Date.now() / 1000)
 
-      console.log('JWT Payload:', payload)
-      console.log('当前时间:', currentTime, '过期时间:', payload.exp)
-
-      // 检查是否有过期时间字段
       if (!payload.exp) {
-        console.warn('Token 没有过期时间字段，假设有效')
-        return false
+        return true
       }
 
-      // 检查是否过期
-      const isExpired = payload.exp < currentTime
-      console.log('Token 是否过期:', isExpired)
-      return isExpired
-    } catch (error) {
-      console.error('Token 解析失败:', error)
-      console.log('Token 内容:', token)
-      // 如果解析失败，我们暂时假设 token 有效，让后端来验证
-      return false
+      return payload.exp < currentTime
+    } catch {
+      return true
     }
   }
   

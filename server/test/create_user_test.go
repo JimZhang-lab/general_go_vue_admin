@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"os"
 	"server/common/config"
 	"testing"
 	"time"
@@ -112,6 +113,10 @@ func CreateUser() {
 }
 
 func TestCreateCatalog(t *testing.T) {
+	if os.Getenv("RUN_DB_TESTS") != "1" {
+		t.Skip("跳过数据库集成测试（设置 RUN_DB_TESTS=1 可启用）")
+	}
+
 	fmt.Println("TestCreateCatalog")
 	CreateUser()
 }

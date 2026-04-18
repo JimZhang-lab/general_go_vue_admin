@@ -14,11 +14,15 @@ import (
 	"fmt"
 	"server/api/dao"
 	"server/api/entity"
+	"server/common/config"
 	"server/common/errors"
 	"server/common/result"
 	"server/common/service"
 	"server/common/utils"
 	"server/pkg/jwt"
+	pkgRedis "server/pkg/redis"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -27,6 +31,7 @@ import (
 // 定义接口 - 优化后支持错误链式传递
 type ISysAdminService interface {
 	Login(ctx context.Context, dto entity.LoginDto) *service.ServiceResult
+	Register(ctx context.Context, dto entity.RegisterDto) *service.ServiceResult
 	CreateSysAdmin(ctx context.Context, dto entity.AddSysAdminDto) *service.ServiceResult
 	GetSysAdminInfo(ctx context.Context, id int) *service.ServiceResult
 	UpdateSysAdmin(ctx context.Context, dto entity.UpdateSysAdminDto) *service.ServiceResult
@@ -41,6 +46,101 @@ type ISysAdminService interface {
 // SysAdminServiceImpl 系统管理员服务实现
 type SysAdminServiceImpl struct {
 	*service.BaseService
+}
+
+const invalidCredentialsMessage = "密码或账号错误"
+
+const (
+	defaultLoginFailedAttemptLimit = 5
+	defaultLoginLockDuration       = 15 * time.Minute
+	loginFailCounterPrefix         = "login:fail:user:"
+	loginLockPrefix                = "login:lock:user:"
+)
+
+func getLoginSecurityPolicy() (int64, time.Duration) {
+	limit := int64(config.Config.Security.LoginFailedAttemptLimit)
+	if limit <= 0 {
+		limit = defaultLoginFailedAttemptLimit
+	}
+
+	lockMinutes := config.Config.Security.LoginLockMinutes
+	if lockMinutes <= 0 {
+		lockMinutes = int(defaultLoginLockDuration / time.Minute)
+	}
+
+	return limit, time.Duration(lockMinutes) * time.Minute
+}
+
+func normalizeLoginKeyPart(value string) string {
+	trimmed := strings.TrimSpace(strings.ToLower(value))
+	if trimmed == "" {
+		return "unknown"
+	}
+	replacer := strings.NewReplacer(" ", "_", ":", "_", "/", "_", "\\", "_")
+	return replacer.Replace(trimmed)
+}
+
+func loginCounterKey(username string) string {
+	return loginFailCounterPrefix + normalizeLoginKeyPart(username)
+}
+
+func loginLockKey(username string) string {
+	return loginLockPrefix + normalizeLoginKeyPart(username)
+}
+
+func getLockTTL(ctx context.Context, username string, fallbackTTL time.Duration) (time.Duration, bool) {
+	if pkgRedis.RedisDb == nil {
+		return 0, false
+	}
+
+	key := loginLockKey(username)
+	exists, err := pkgRedis.RedisDb.Exists(ctx, key).Result()
+	if err != nil || exists == 0 {
+		return 0, false
+	}
+
+	ttl, err := pkgRedis.RedisDb.TTL(ctx, key).Result()
+	if err != nil {
+		return fallbackTTL, true
+	}
+
+	if ttl <= 0 {
+		return fallbackTTL, true
+	}
+
+	return ttl, true
+}
+
+func recordLoginFailedAttempt(ctx context.Context, username string, limit int64, lockDuration time.Duration) (int64, bool) {
+	if pkgRedis.RedisDb == nil {
+		return 0, false
+	}
+
+	counterKey := loginCounterKey(username)
+	counter, err := pkgRedis.RedisDb.Incr(ctx, counterKey).Result()
+	if err != nil {
+		return 0, false
+	}
+
+	if counter == 1 {
+		_ = pkgRedis.RedisDb.Expire(ctx, counterKey, lockDuration).Err()
+	}
+
+	locked := counter >= limit
+	if locked {
+		_ = pkgRedis.RedisDb.Set(ctx, loginLockKey(username), "1", lockDuration).Err()
+		_ = pkgRedis.RedisDb.Del(ctx, counterKey).Err()
+	}
+
+	return counter, locked
+}
+
+func clearLoginFailedAttempt(ctx context.Context, username string) {
+	if pkgRedis.RedisDb == nil {
+		return
+	}
+
+	_ = pkgRedis.RedisDb.Del(ctx, loginCounterKey(username), loginLockKey(username)).Err()
 }
 
 // NewSysAdminService 创建系统管理员服务实例（暂时注释，保持向后兼容）
@@ -77,11 +177,22 @@ func (s SysAdminServiceImpl) UpdatePersonalPassword(c *gin.Context, dto entity.U
 
 // 修改个人信息
 func (s SysAdminServiceImpl) UpdatePersonal(c *gin.Context, dto entity.UpdatePersonalDto) {
+	dto.Username = strings.TrimSpace(dto.Username)
+	dto.Nickname = strings.TrimSpace(dto.Nickname)
+	dto.Phone = strings.TrimSpace(dto.Phone)
+	dto.Email = strings.TrimSpace(dto.Email)
+	dto.Note = strings.TrimSpace(dto.Note)
+
 	err := validator.New().Struct(dto)
 	if err != nil {
 		result.Failed(c, int(result.ApiCode.MissingModificationOfPersonalParameters), result.ApiCode.GetMessage(result.ApiCode.MissingModificationOfPersonalParameters))
 		return
 	}
+
+	if dto.Nickname == "" {
+		dto.Nickname = dto.Username
+	}
+
 	id, _ := jwt.GetAdminId(c)
 	dto.Id = id
 	result.Success(c, dao.UpdatePersonal(dto))
@@ -144,8 +255,68 @@ func (s SysAdminServiceImpl) CreateSysAdmin(c *gin.Context, dto entity.AddSysAdm
 	return
 }
 
+// Register 公开注册账号
+func (s *SysAdminServiceImpl) Register(ctx context.Context, dto entity.RegisterDto) *service.ServiceResult {
+	dto.Username = strings.TrimSpace(dto.Username)
+	dto.Nickname = strings.TrimSpace(dto.Nickname)
+	dto.Email = strings.TrimSpace(dto.Email)
+	dto.Phone = strings.TrimSpace(dto.Phone)
+	dto.Image = strings.TrimSpace(dto.Image)
+
+	if err := s.ValidateStruct(dto); err != nil {
+		return service.NewServiceResult(nil, err)
+	}
+
+	if dto.Password != dto.ConfirmPassword {
+		return service.NewServiceResult(nil, errors.ValidationError("两次输入的密码不一致"))
+	}
+
+	code := utils.RedisStore{}.Get(dto.IdKey, false)
+	if len(code) == 0 {
+		return service.NewServiceResult(nil, errors.ValidationError("验证码已过期"))
+	}
+	if !CaptVerify(dto.IdKey, dto.Image) {
+		return service.NewServiceResult(nil, errors.ValidationError("验证码不正确"))
+	}
+
+	if sysAdmin := dao.GetSysAdminByUsername(dto.Username); sysAdmin.ID > 0 {
+		return service.NewServiceResult(nil, errors.ValidationError("用户名已存在，请重新输入"))
+	}
+
+	role, err := dao.GetDefaultRegisterRole()
+	if err != nil {
+		return service.NewServiceResult(nil, errors.ValidationError("系统默认角色未初始化，暂时无法注册"))
+	}
+
+	dept, err := dao.GetDefaultRegisterDept()
+	if err != nil {
+		return service.NewServiceResult(nil, errors.ValidationError("系统默认部门未初始化，暂时无法注册"))
+	}
+
+	post, err := dao.GetDefaultRegisterPost()
+	if err != nil {
+		return service.NewServiceResult(nil, errors.ValidationError("系统默认岗位未初始化，暂时无法注册"))
+	}
+
+	if dto.Nickname == "" {
+		dto.Nickname = dto.Username
+	}
+
+	if err := dao.CreatePublicSysAdmin(dto, role.ID, dept.ID, post.ID); err != nil {
+		return service.NewServiceResult(nil, errors.Wrap(err, errors.ErrDatabase, "注册失败"))
+	}
+
+	return service.NewServiceResult(gin.H{
+		"username": dto.Username,
+		"nickname": dto.Nickname,
+	}, nil)
+}
+
 // Login 用户登录 - 优化版本支持错误链式传递
 func (s *SysAdminServiceImpl) Login(ctx context.Context, dto entity.LoginDto) *service.ServiceResult {
+	dto.Username = strings.TrimSpace(dto.Username)
+	dto.Image = strings.TrimSpace(dto.Image)
+
 	// 参数验证
 	if err := s.ValidateStruct(dto); err != nil {
 		return service.NewServiceResult(nil, err)
@@ -159,47 +330,44 @@ func (s *SysAdminServiceImpl) Login(ctx context.Context, dto entity.LoginDto) *s
 		ip = "unknown"
 	}
 
-	// 并行执行验证码检查和用户信息查询
-	var code string
-	var sysAdmin entity.SysAdmin
+	failedLimit, lockDuration := getLoginSecurityPolicy()
 
-	err := s.ParallelExecute(
-		// 验证码检查任务
-		func() error {
-			code = utils.RedisStore{}.Get(dto.IdKey, true)
-			if len(code) == 0 {
-				dao.CreateSysLoginInfo(dto.Username, ip, utils.GetRealAddressByIP(ip), "", "", "验证码已过期", 2)
-				return errors.AuthenticationError("验证码已过期")
-			}
-
-			// 添加调试日志
-			fmt.Printf("🔍 验证码调试: ID=%s, 存储值=%s, 输入值=%s\n", dto.IdKey, code, dto.Image)
-
-			// 校验验证码
-			if !CaptVerify(dto.IdKey, dto.Image) {
-				dao.CreateSysLoginInfo(dto.Username, ip, utils.GetRealAddressByIP(ip), "", "", "验证码不正确", 2)
-				return errors.AuthenticationError("验证码不正确")
-			}
-			return nil
-		},
-		// 用户信息查询任务
-		func() error {
-			sysAdmin = dao.SysAdminDetail(dto)
-			if sysAdmin.ID == 0 {
-				return errors.NotFoundError("用户")
-			}
-			return nil
-		},
-	)
-
-	if err.HasErrors() {
-		return service.NewServiceResult(nil, err.First())
+	if lockTTL, locked := getLockTTL(ctx, dto.Username, lockDuration); locked {
+		waitMinutes := int(lockTTL.Minutes())
+		if waitMinutes < 1 {
+			waitMinutes = 1
+		}
+		message := fmt.Sprintf("登录尝试过于频繁，请 %d 分钟后再试", waitMinutes)
+		dao.CreateSysLoginInfo(dto.Username, ip, utils.GetRealAddressByIP(ip), "", "", message, 2)
+		return service.NewServiceResult(nil, errors.New(errors.ErrRateLimit, message))
 	}
 
-	// 密码验证
-	if sysAdmin.Password != utils.EncryptionMd5(dto.Password) {
-		dao.CreateSysLoginInfo(dto.Username, ip, utils.GetRealAddressByIP(ip), "", "", "密码不正确", 2)
-		return service.NewServiceResult(nil, errors.AuthenticationError("密码不正确"))
+	code := utils.RedisStore{}.Get(dto.IdKey, false)
+	if len(code) == 0 {
+		dao.CreateSysLoginInfo(dto.Username, ip, utils.GetRealAddressByIP(ip), "", "", "验证码已过期", 2)
+		return service.NewServiceResult(nil, errors.AuthenticationError("验证码已过期"))
+	}
+
+	if !CaptVerify(dto.IdKey, dto.Image) {
+		dao.CreateSysLoginInfo(dto.Username, ip, utils.GetRealAddressByIP(ip), "", "", "验证码不正确", 2)
+		return service.NewServiceResult(nil, errors.AuthenticationError("验证码不正确"))
+	}
+
+	sysAdmin := dao.SysAdminDetail(dto)
+	if sysAdmin.ID == 0 || sysAdmin.Password != utils.EncryptionMd5(dto.Password) {
+		_, locked := recordLoginFailedAttempt(ctx, dto.Username, failedLimit, lockDuration)
+		if locked {
+			lockMinutes := int(lockDuration / time.Minute)
+			if lockMinutes < 1 {
+				lockMinutes = 1
+			}
+			lockMessage := fmt.Sprintf("登录尝试过于频繁，请 %d 分钟后再试", lockMinutes)
+			dao.CreateSysLoginInfo(dto.Username, ip, utils.GetRealAddressByIP(ip), "", "", lockMessage, 2)
+			return service.NewServiceResult(nil, errors.New(errors.ErrRateLimit, lockMessage))
+		}
+
+		dao.CreateSysLoginInfo(dto.Username, ip, utils.GetRealAddressByIP(ip), "", "", invalidCredentialsMessage, 2)
+		return service.NewServiceResult(nil, errors.AuthenticationError(invalidCredentialsMessage))
 	}
 
 	// 账号状态检查
@@ -209,13 +377,15 @@ func (s *SysAdminServiceImpl) Login(ctx context.Context, dto entity.LoginDto) *s
 		return service.NewServiceResult(nil, errors.AuthenticationError("账号已停用"))
 	}
 
+	clearLoginFailedAttempt(ctx, dto.Username)
+
 	// 生成token和构建响应数据
 	var tokenString string
 	var leftMenuVo []entity.LeftMenuVo
 	var permissionList []entity.ValueVo
 
 	// 并行执行token生成和菜单权限查询
-	err = s.ParallelExecute(
+	parallelErr := s.ParallelExecute(
 		// Token生成任务
 		func() error {
 			var genErr error
@@ -248,8 +418,8 @@ func (s *SysAdminServiceImpl) Login(ctx context.Context, dto entity.LoginDto) *s
 		},
 	)
 
-	if err.HasErrors() {
-		return service.NewServiceResult(nil, err.First())
+	if parallelErr.HasErrors() {
+		return service.NewServiceResult(nil, parallelErr.First())
 	}
 
 	// 记录登录成功日志
@@ -270,6 +440,16 @@ func (s *SysAdminServiceImpl) Login(ctx context.Context, dto entity.LoginDto) *s
 	}
 
 	return service.NewServiceResult(loginResult, nil)
+}
+
+// RegisterLegacy 保持向后兼容的注册方法
+func (s *SysAdminServiceImpl) RegisterLegacy(c *gin.Context, dto entity.RegisterDto) {
+	serviceResult := s.Register(c, dto)
+	if serviceResult.IsSuccess() {
+		result.Success(c, serviceResult.Data)
+	} else {
+		result.FailedWithError(c, serviceResult.Error)
+	}
 }
 
 // LoginLegacy 保持向后兼容的登录方法

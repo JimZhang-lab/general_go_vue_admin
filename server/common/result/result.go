@@ -125,6 +125,10 @@ func getHTTPStatusFromError(err *errors.AppError) int {
 		return http.StatusForbidden
 	case errors.ErrNotFound:
 		return http.StatusNotFound
+	case errors.ErrAlreadyExists:
+		return http.StatusConflict
+	case errors.ErrInvalidOperation:
+		return http.StatusBadRequest
 	case errors.ErrValidation:
 		return http.StatusBadRequest
 	case errors.ErrRateLimit:

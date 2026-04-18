@@ -32,6 +32,7 @@ func (u UploadServiceImpl) Upload(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		result.Failed(c, int(result.ApiCode.FILEUPLOADERROR), result.ApiCode.GetMessage(result.ApiCode.FILEUPLOADERROR))
+		return
 	}
 	now := time.Now()
 	ext := path.Ext(file.Filename)
@@ -43,7 +44,10 @@ func (u UploadServiceImpl) Upload(c *gin.Context) {
 		fmt.Sprintf("%04d", now.Day()))
 	utils.CreateDir(filePath)
 	fullPath := filePath + "/" + fileName
-	c.SaveUploadedFile(file, fullPath)
+	if err = c.SaveUploadedFile(file, fullPath); err != nil {
+		result.Failed(c, int(result.ApiCode.FILEUPLOADERROR), "文件保存失败")
+		return
+	}
 	result.Success(c, config.Config.ImageSettings.ImageHost+fullPath)
 }
 

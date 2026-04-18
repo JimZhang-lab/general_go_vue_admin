@@ -13,7 +13,7 @@
               <!-- 头像 -->
               <div class="relative inline-block">
                 <img
-                  :src="userInfo.avatar || '/default-avatar.png'"
+                  :src="userInfo.icon || '/images/user/user-01.jpg'"
                   alt="用户头像"
                   class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                 />
@@ -36,10 +36,10 @@
               <!-- 状态标签 -->
               <div class="mt-4">
                 <span
-                  :class="userInfo.status === '1' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                  :class="isUserEnabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
                   class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
                 >
-                  {{ userInfo.status === '1' ? '正常' : '禁用' }}
+                  {{ isUserEnabled ? '正常' : '禁用' }}
                 </span>
               </div>
               
@@ -91,9 +91,9 @@
                 </div>
                 
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">真实姓名</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">昵称</label>
                   <input
-                    v-model="profileForm.realName"
+                    v-model="profileForm.nickname"
                     type="text"
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -103,7 +103,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
                 <textarea
-                  v-model="profileForm.remark"
+                  v-model="profileForm.note"
                   rows="3"
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="请输入个人简介..."
@@ -130,7 +130,7 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">当前密码 *</label>
                 <input
-                  v-model="passwordForm.oldPassword"
+                  v-model="passwordForm.password"
                   type="password"
                   required
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -222,7 +222,7 @@
                   class="hidden"
                 />
                 <button
-                  @click="$refs.avatarInput?.click()"
+                  @click="triggerAvatarInput"
                   class="text-gray-500 hover:text-gray-700"
                 >
                   <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -243,10 +243,10 @@
               </button>
               <button
                 @click="uploadAvatar"
-                :disabled="!selectedAvatar"
+                :disabled="!selectedAvatar || uploadingAvatar"
                 class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
               >
-                上传
+                {{ uploadingAvatar ? '上传中...' : '上传' }}
               </button>
             </div>
           </div>
@@ -257,8 +257,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
+import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import adminApi from '@/api/system'
 import ToastAlert from '@/composables/ToastAlert'
 import { useMainStore } from '@/store'
@@ -267,12 +268,12 @@ import { useMainStore } from '@/store'
 interface UserInfo {
   id: number
   username: string
+  nickname?: string
   phone?: string
   email?: string
-  realName?: string
-  avatar?: string
-  status: string
-  remark?: string
+  icon?: string
+  status: number | string
+  note?: string
   lastLoginTime?: string
   createTime?: string
 }
@@ -288,31 +289,41 @@ interface LoginLog {
 
 // 响应式数据
 const store = useMainStore()
+const currentPageTitle = ref('个人资料')
 const userInfo = ref<UserInfo>({
   id: 0,
   username: '',
+  nickname: '',
   status: '1'
 })
 const loginLogs = ref<LoginLog[]>([])
 const updating = ref(false)
 const changingPassword = ref(false)
+const uploadingAvatar = ref(false)
 const showAvatarUpload = ref(false)
 const selectedAvatar = ref<File | null>(null)
+const avatarInput = ref<HTMLInputElement | null>(null)
 
 // 表单数据
 const profileForm = reactive({
   username: '',
   phone: '',
   email: '',
-  realName: '',
-  remark: ''
+  nickname: '',
+  note: ''
 })
 
 const passwordForm = reactive({
-  oldPassword: '',
+  password: '',
   newPassword: '',
   confirmPassword: ''
 })
+
+const isUserEnabled = computed(() => Number(userInfo.value.status) === 1)
+
+const triggerAvatarInput = () => {
+  avatarInput.value?.click()
+}
 
 // 格式化日期
 const formatDate = (dateString?: string) => {
@@ -333,8 +344,8 @@ const getUserInfo = async () => {
         username: res.data.username,
         phone: res.data.phone || '',
         email: res.data.email || '',
-        realName: res.data.realName || '',
-        remark: res.data.remark || ''
+        nickname: res.data.nickname || '',
+        note: res.data.note || ''
       })
     } else {
       ToastAlert.error({
@@ -352,8 +363,8 @@ const getUserInfo = async () => {
         username: storeUser.username || '',
         phone: storeUser.phone || '',
         email: storeUser.email || '',
-        realName: storeUser.realName || '',
-        remark: storeUser.remark || ''
+        nickname: storeUser.nickname || '',
+        note: storeUser.note || ''
       })
     }
   }
@@ -399,7 +410,13 @@ const updateProfile = async () => {
   try {
     updating.value = true
 
-    const { data: res } = await adminApi.updateProfile(profileForm)
+    const { data: res } = await adminApi.updateProfile({
+      username: profileForm.username.trim(),
+      nickname: profileForm.nickname.trim(),
+      phone: profileForm.phone.trim(),
+      email: profileForm.email.trim(),
+      note: profileForm.note.trim()
+    })
 
     if (res.code === 200) {
       ToastAlert.success({
@@ -455,8 +472,9 @@ const changePassword = async () => {
     changingPassword.value = true
 
     const { data: res } = await adminApi.changePassword({
-      oldPassword: passwordForm.oldPassword,
-      newPassword: passwordForm.newPassword
+      password: passwordForm.password,
+      newPassword: passwordForm.newPassword,
+      resetPassword: passwordForm.confirmPassword
     })
 
     if (res.code === 200) {
@@ -467,7 +485,7 @@ const changePassword = async () => {
 
       // 清空表单
       Object.assign(passwordForm, {
-        oldPassword: '',
+        password: '',
         newPassword: '',
         confirmPassword: ''
       })
@@ -527,13 +545,36 @@ const uploadAvatar = async () => {
   if (!selectedAvatar.value) return
 
   try {
+    uploadingAvatar.value = true
     const formData = new FormData()
-    formData.append('avatar', selectedAvatar.value)
+    formData.append('file', selectedAvatar.value)
 
-    // 这里应该调用上传头像的API
-    // const { data: res } = await adminApi.uploadAvatar(formData)
+    const { data: uploadRes } = await adminApi.uploadFile(formData)
+    if (uploadRes.code !== 200 || !uploadRes.data) {
+      throw new Error(uploadRes.message || '头像上传失败')
+    }
 
-    // 模拟上传成功
+    const avatarUrl = uploadRes.data
+
+    const { data: updateRes } = await adminApi.updateProfile({
+      username: profileForm.username.trim(),
+      nickname: profileForm.nickname.trim(),
+      phone: profileForm.phone.trim(),
+      email: profileForm.email.trim(),
+      note: profileForm.note.trim(),
+      icon: avatarUrl
+    })
+
+    if (updateRes.code !== 200) {
+      throw new Error(updateRes.message || '头像保存失败')
+    }
+
+    userInfo.value.icon = avatarUrl
+    store.saveSysAdmin({
+      ...store.sysAdmin,
+      icon: avatarUrl
+    })
+
     ToastAlert.success({
       title: '上传成功',
       message: '头像已更新'
@@ -545,8 +586,10 @@ const uploadAvatar = async () => {
     console.error('上传头像失败:', error)
     ToastAlert.error({
       title: '上传失败',
-      message: '网络异常，请重试'
+      message: error instanceof Error ? error.message : '网络异常，请重试'
     })
+  } finally {
+    uploadingAvatar.value = false
   }
 }
 

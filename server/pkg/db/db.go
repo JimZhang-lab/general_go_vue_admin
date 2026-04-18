@@ -64,8 +64,8 @@ func SetupDBLink() error {
 
 	// 首次运行初始化数据（幂等）
 	if err := seed.InitDataIfNeeded(Db); err != nil {
-		// 不阻断启动，仅打印错误
-		// 可根据需要改为返回错误
+		// 不阻断启动，但打印初始化失败信息，避免静默失败
+		fmt.Printf("seed init failed: %v\n", err)
 	}
 
 	sqlDB, err := Db.DB()

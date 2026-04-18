@@ -20,7 +20,7 @@ class Storage {
   }
 
   setItem(key: string, val: any) {
-    let storage = this.getStorage()
+    const storage = this.getStorage()
     storage[key] = val
     window.localStorage.setItem(import.meta.env.VITE_NAME_SPACE as string, JSON.stringify(storage))
   }
@@ -30,7 +30,7 @@ class Storage {
   }
 
   clearItem(key: string) {
-    let storage = this.getStorage()
+    const storage = this.getStorage()
     delete storage[key]
     window.localStorage.setItem(import.meta.env.VITE_NAME_SPACE as string, JSON.stringify(storage))
   }

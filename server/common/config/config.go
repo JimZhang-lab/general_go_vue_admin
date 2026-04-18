@@ -10,6 +10,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -20,6 +22,7 @@ type config struct {
 	DB            db            `mapstructure:"db" yaml:"db"`
 	Redis         redis         `mapstructure:"redis" yaml:"redis"`
 	RabbitMQ      rabbitmq      `mapstructure:"rabbitmq" yaml:"rabbitmq"`
+	Security      security      `mapstructure:"security" yaml:"security"`
 	ImageSettings imageSettings `mapstructure:"imageSettings" yaml:"imageSettings"`
 	Log           log           `mapstructure:"log" yaml:"log"`
 	Jwt           JWT           `mapstructure:"jwt" yaml:"jwt"`
@@ -75,6 +78,11 @@ type rabbitmq struct {
 	MaxReconnectAttempts int    `mapstructure:"maxReconnectAttempts" yaml:"maxReconnectAttempts"`
 }
 
+type security struct {
+	LoginFailedAttemptLimit int `mapstructure:"loginFailedAttemptLimit" yaml:"loginFailedAttemptLimit"`
+	LoginLockMinutes        int `mapstructure:"loginLockMinutes" yaml:"loginLockMinutes"`
+}
+
 type log struct {
 	Path       string `mapstructure:"path" yaml:"path"`
 	Name       string `mapstructure:"name" yaml:"name"`
@@ -122,21 +130,51 @@ type seedUser struct {
 
 var Config *config
 
+func resolveConfigPath() (string, error) {
+	// 常见启动目录：
+	// 1) server/ 下运行：./config.yaml
+	// 2) 仓库根目录运行：./server/config.yaml
+	// 3) 测试子包目录运行：../config.yaml
+	candidates := []string{
+		"./config.yaml",
+		"./server/config.yaml",
+		"../config.yaml",
+		"../../config.yaml",
+	}
+
+	for _, candidate := range candidates {
+		absPath, err := filepath.Abs(candidate)
+		if err != nil {
+			continue
+		}
+		if _, err = os.Stat(absPath); err == nil {
+			return absPath, nil
+		}
+	}
+
+	return "", fmt.Errorf("未找到配置文件，已尝试路径: %s", strings.Join(candidates, ", "))
+}
+
 func init() {
 	v := viper.New()
-	v.SetConfigFile("./config.yaml")
+	configPath, err := resolveConfigPath()
+	if err != nil {
+		panic(fmt.Errorf("读取配置失败: %w", err))
+	}
+
+	v.SetConfigFile(configPath)
 	v.SetConfigType("yaml")
 
 	// 支持环境变量覆盖（如 SERVER_PORT=8080 覆盖 server.port）
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv()
 
-	if err := v.ReadInConfig(); err != nil {
+	if err = v.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("读取配置失败: %w", err))
 	}
 
 	var cfg config
-	if err := v.Unmarshal(&cfg); err != nil {
+	if err = v.Unmarshal(&cfg); err != nil {
 		panic(fmt.Errorf("解析配置失败: %w", err))
 	}
 	Config = &cfg

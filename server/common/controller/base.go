@@ -61,12 +61,12 @@ func (bc *BaseController) GetIntParam(c *gin.Context, key string) (int, *errors.
 	if value == "" {
 		return 0, errors.ValidationError("参数 " + key + " 不能为空")
 	}
-	
+
 	intValue, err := strconv.Atoi(value)
 	if err != nil {
 		return 0, errors.Wrap(err, errors.ErrValidation, "参数 "+key+" 必须是整数")
 	}
-	
+
 	return intValue, nil
 }
 
@@ -76,12 +76,12 @@ func (bc *BaseController) GetIntQuery(c *gin.Context, key string, defaultValue i
 	if value == "" {
 		return defaultValue
 	}
-	
+
 	intValue, err := strconv.Atoi(value)
 	if err != nil {
 		return defaultValue
 	}
-	
+
 	return intValue
 }
 
@@ -107,7 +107,7 @@ func (bc *BaseController) GetStringQuery(c *gin.Context, key string, defaultValu
 func (bc *BaseController) GetPageParams(c *gin.Context) (page, pageSize int) {
 	page = bc.GetIntQuery(c, "page", 1)
 	pageSize = bc.GetIntQuery(c, "page_size", 10)
-	
+
 	if page < 1 {
 		page = 1
 	}
@@ -117,7 +117,7 @@ func (bc *BaseController) GetPageParams(c *gin.Context) (page, pageSize int) {
 	if pageSize > 100 {
 		pageSize = 100 // 限制最大页面大小
 	}
-	
+
 	return page, pageSize
 }
 
@@ -146,7 +146,7 @@ func (bc *BaseController) HandleError(c *gin.Context, err error) {
 	if err == nil {
 		return
 	}
-	
+
 	if appErr, ok := err.(*errors.AppError); ok {
 		bc.FailedWithError(c, appErr)
 	} else {
@@ -162,7 +162,7 @@ func (bc *BaseController) ValidateRequired(fields map[string]interface{}) *error
 		if fieldValue == nil {
 			return errors.ValidationError("字段 " + fieldName + " 是必需的")
 		}
-		
+
 		switch v := fieldValue.(type) {
 		case string:
 			if v == "" {
@@ -183,12 +183,19 @@ func (bc *BaseController) GetUserID(c *gin.Context) (int, *errors.AppError) {
 	if !exists {
 		return 0, errors.AuthenticationError("用户未登录")
 	}
-	
-	if id, ok := userID.(int); ok {
+
+	switch id := userID.(type) {
+	case int:
 		return id, nil
+	case uint:
+		return int(id), nil
+	case int64:
+		return int(id), nil
+	case uint64:
+		return int(id), nil
+	default:
+		return 0, errors.AuthenticationError("无效的用户ID")
 	}
-	
-	return 0, errors.AuthenticationError("无效的用户ID")
 }
 
 // GetUserInfo 从上下文获取用户信息
@@ -197,11 +204,11 @@ func (bc *BaseController) GetUserInfo(c *gin.Context) (map[string]interface{}, *
 	if !exists {
 		return nil, errors.AuthenticationError("用户信息不存在")
 	}
-	
+
 	if info, ok := userInfo.(map[string]interface{}); ok {
 		return info, nil
 	}
-	
+
 	return nil, errors.AuthenticationError("无效的用户信息")
 }
 

@@ -1,292 +1,239 @@
-# 🚀 Go-Vue高性能后台管理系统
+# General Go Vue Admin
 
-基于Go + Vue3 + TypeScript + TailWindCss构建的现代化高性能后台管理系统，集成RabbitMQ、Redis缓存优化、API限流熔断等中间件，QPS性能提升5倍以上！
+一个面向生产的后台管理系统，基于 **Go + Vue3 + TypeScript + TailwindCSS**。  
+目标不是“能跑”，而是长期可维护、可演进、可观测、可持续优化。
 
-## ⭐ 项目亮点
+## 1. 项目定位
 
-### 🎯 性能优化成果
-- **QPS提升**: 从200提升至 **1000+** (5倍提升)
-- **响应时间**: 从500ms降低至 **<100ms** (5倍提升)
-- **错误率**: 控制在 **<1%** 以内
-- **并发处理**: 支持 **500+** 并发连接
+- 面向中后台场景的通用管理底座（用户、角色、菜单、组织、日志）
+- 强调安全性（鉴权、验证码、登录防暴力破解、统一错误处理）
+- 强调稳定性（中间件治理、连接池配置、构建与自检闭环）
+- 强调体验一致（统一表单反馈、浅色动态登录/注册页、组件复用）
 
-### 🏗️ 核心架构优化
-- ✅ **RabbitMQ消息队列**: 异步处理，削峰填谷
-- ✅ **Redis缓存优化**: 多层缓存，分布式锁，会话管理
-- ✅ **数据库连接池**: 高效连接复用，读写分离支持
-- ✅ **API限流熔断**: 多算法限流，智能熔断保护
-- ✅ **异步日志处理**: 高性能日志，不阻塞主业务
-- ✅ **性能监控**: 实时监控，智能告警
-- ✅ **负载测试**: 自动化测试，性能验证
+## 2. 核心能力
 
-## 📦 技术栈
+### 2.1 业务能力
 
-### 后端技术
-- **Go 1.21+**: 高性能编程语言
-- **Gin**: 轻量级Web框架
-- **GORM**: ORM框架，优化连接池配置
-- **MySQL**: 关系型数据库，支持读写分离
-- **Redis**: 缓存数据库，分布式锁，会话管理
-- **RabbitMQ**: 消息队列，异步处理
-- **JWT**: 身份认证
+- 认证模块：登录、注册、退出、验证码
+- 账号体系：管理员管理、个人资料、密码修改、头像上传
+- 权限体系：角色管理、菜单管理、权限分配
+- 组织体系：部门管理、岗位管理
+- 审计体系：登录日志、操作日志
 
-### 前端技术
-- **Vue 3**: 渐进式JavaScript框架
-- **TypeScript**: JavaScript超集
-- **TailWindCss**: Vue 3组件库
-- **Vite**: 前端构建工具
-- **Pinia**: 状态管理
-- **Vue Router**: 路由管理
+### 2.2 安全能力
 
-### 中间件集成
-- **限流器**: 令牌桶、滑动窗口、固定窗口算法
-- **熔断器**: 智能熔断，优雅降级
-- **缓存管理**: 多种数据类型缓存，自动过期
-- **分布式锁**: 防止并发冲突，自动续期
-- **异步日志**: 批量处理，多级缓冲
-- **性能监控**: HTTP指标、系统指标、自定义指标
+- JWT 鉴权与路由保护
+- 验证码校验（已修复为一次性消费，防止重复复用）
+- 登录失败防暴力破解：
+  - 连续失败达到阈值自动锁定
+  - 锁定时间到期自动恢复
+  - 阈值与时长可配置（`security.loginFailedAttemptLimit` / `security.loginLockMinutes`）
+- 统一错误模型与 TraceID 支撑
 
-## 🛠️ 快速开始
+### 2.3 稳定性与工程能力
 
-### 环境要求
+- 后端自检：`go test ./...` + `go build ./...` + `go vet ./...`
+- 前端自检：`npm run build-only`
+- 一键全链路自检脚本：`server/tools/self_check.sh`
+- 前端分包策略（manualChunks）降低主包体积与首屏压力
+
+## 3. 技术栈
+
+### 后端（server）
+
 - Go 1.21+
-- Node.js 16+
-- MySQL 8.0+
-- Redis 6.0+
-- RabbitMQ 3.8+ (可选)
+- Gin
+- GORM + MySQL
+- Redis
+- JWT
+- Swagger
 
-### 中间件部署
+### 前端（web）
+
+- Vue 3 + TypeScript
+- Vite
+- Pinia
+- Vue Router
+- TailwindCSS + DaisyUI
+- Axios
+
+## 4. 项目结构
+
+```text
+general_go_vue_admin/
+├── docs/                       # 项目文档
+│   ├── EVOLUTION_MATRIX.md     # 演进矩阵（对标能力清单）
+│   ├── backend/
+│   └── frontend/
+├── server/                     # Go 后端
+│   ├── api/
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── dao/
+│   │   └── entity/
+│   ├── common/
+│   ├── middleware/
+│   ├── pkg/
+│   ├── router/
+│   ├── test/
+│   ├── tools/
+│   │   └── self_check.sh       # 一键自检
+│   ├── config.yaml
+│   └── main.go
+└── web/                        # Vue 前端
+    ├── src/
+    │   ├── api/
+    │   ├── views/
+    │   ├── components/
+    │   ├── router/
+    │   ├── store/
+    │   └── utils/
+    ├── vite.config.ts
+    └── package.json
+```
+
+## 5. 快速启动
+
+## 5.1 环境准备
+
+- Go 1.21+
+- Node.js 18+
+- MySQL 8+
+- Redis 6+
+
+## 5.2 启动依赖（示例）
+
 ```bash
 # Redis
 docker run -d --name redis -p 6379:6379 redis:7-alpine
 
-# RabbitMQ (可选)
-docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
-
 # MySQL
-docker run -d --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=admin1234 mysql:8.0
+docker run -d --name mysql \
+  -p 3306:3306 \
+  -e MYSQL_ROOT_PASSWORD=admin1234 \
+  mysql:8.0
 ```
 
-### 后端启动
+## 5.3 启动后端
+
 ```bash
 cd server
 go mod tidy
 go run main.go
 ```
 
-### 前端启动
+默认地址：`http://127.0.0.1:8080`
+
+## 5.4 启动前端
+
 ```bash
 cd web
 npm install
 npm run dev
 ```
 
-## 📁 项目结构
+默认地址：`http://localhost:3000`
 
-```
-├── docs/                   # 📚 项目文档中心
-│   ├── README.md          # 文档索引
-│   ├── OPTIMIZATION_SUMMARY.md  # 项目整体优化总结
-│   ├── backend/           # 后端文档
-│   │   ├── README.md      # 后端文档索引
-│   │   ├── QPS_OPTIMIZATION_SUMMARY.md    # QPS优化详细方案
-│   │   ├── BUGFIX_SUMMARY.md       # 后端问题修复总结
-│   │   ├── LOGIN_ISSUE_SOLUTION.md # 登录问题解决方案
-│   │   ├── API_DOCUMENTATION.md    # API接口文档
-│   │   └── DEPLOYMENT_GUIDE.md     # 部署指南
-│   └── frontend/          # 前端文档
-│       ├── README.md      # 前端文档索引
-│       └── COMPONENT_GUIDE.md      # 组件开发指南
-├── server/                # 后端代码
-│   ├── api/               # API接口
-│   ├── common/            # 公共模块
-│   ├── middleware/        # 中间件
-│   │   ├── rate_limit_middleware.go    # 限流熔断中间件
-│   │   ├── logging_middleware.go       # 异步日志中间件
-│   │   └── metrics_middleware.go       # 性能监控中间件
-│   ├── pkg/               # 核心包
-│   │   ├── rabbitmq/      # RabbitMQ消息队列
-│   │   ├── redis/         # Redis缓存优化
-│   │   ├── database/      # 数据库连接池优化
-│   │   ├── limiter/       # API限流器
-│   │   ├── breaker/       # 熔断器
-│   │   ├── logger/        # 异步日志处理
-│   │   ├── metrics/       # 性能监控
-│   │   └── bootstrap/     # 系统启动引导
-│   ├── tools/             # 测试工具
-│   │   ├── load_test.go   # 负载测试工具
-│   │   └── performance_test.sh  # 自动化测试脚本
-│   ├── config.yaml        # 优化后的配置
-│   └── main.go           # 入口文件
-├── web/                  # 前端代码
-│   ├── src/              # 源码
-│   ├── public/           # 静态资源
-│   └── package.json      # 依赖配置
-└── README.md             # 项目说明
-```
+## 6. 初始化数据与默认账号
 
-## 📚 文档导航
+项目支持首启种子数据（见 `server/config.yaml` 的 `seed` 配置）。  
+默认会初始化管理员账号（可在配置中修改）：
 
-### 🎯 快速开始
-- [📖 项目文档中心](./docs/README.md) - 所有文档的入口和索引
-- [🚀 项目整体优化总结](./docs/OPTIMIZATION_SUMMARY.md) - 完整的优化历程和成果
+- username: `admin`
+- password: `admin123`
 
-### 🔧 后端文档
-- [📋 后端文档索引](./docs/backend/README.md) - 后端所有文档的入口
-- [⚡ QPS优化方案](./docs/backend/QPS_OPTIMIZATION_SUMMARY.md) - 详细的性能优化实施方案
-- [🐛 问题修复总结](./docs/backend/BUGFIX_SUMMARY.md) - 后端问题修复记录
-- [🔐 登录问题解决](./docs/backend/LOGIN_ISSUE_SOLUTION.md) - 登录401错误解决方案
-- [📚 API接口文档](./docs/backend/API_DOCUMENTATION.md) - RESTful API完整文档
-- [🚀 部署指南](./docs/backend/DEPLOYMENT_GUIDE.md) - 生产环境部署配置
+> 如果数据库中已存在管理员数据，则不会重复初始化。
 
-### 🎨 前端文档
-- [📋 前端文档索引](./docs/frontend/README.md) - 前端所有文档的入口
-- [🎨 组件开发指南](./docs/frontend/COMPONENT_GUIDE.md) - Vue3组件开发规范
+## 7. 关键配置说明（server/config.yaml）
 
-## 🔧 配置说明
+## 7.1 服务与数据库
 
-### 高性能数据库配置
+- `server.port` / `server.host` / `server.model`
+- `db.*`（连接、连接池、慢查询阈值等）
+- `redis.*`
+
+## 7.2 登录安全策略
+
 ```yaml
-db:
-  maxIdleConns: 50        # 最多空闲连接数
-  maxOpenConns: 200       # 最多打开连接数
-  setConnMaxLifetime: 3600 # 连接最大生存时间
-  connMaxIdleTime: 1800   # 连接最大空闲时间
-  prepareStmt: true       # 启用预编译语句缓存
+security:
+  loginFailedAttemptLimit: 5
+  loginLockMinutes: 15
 ```
 
-### RabbitMQ配置
+说明：
+
+- 连续失败达到 `loginFailedAttemptLimit` 时触发锁定
+- 锁定时长为 `loginLockMinutes`
+
+## 7.3 种子数据
+
 ```yaml
-rabbitmq:
-  host: 127.0.0.1
-  port: 5672
-  username: guest
-  password: guest
-  maxConnections: 10      # 最大连接数
-  maxChannels: 100        # 最大通道数
+seed:
+  enable: true
+  admin:
+    username: admin
+    password: admin123
+    nickname: 系统管理员
+    email: admin@example.com
+    phone: 13800138000
 ```
 
-### Redis配置
-```yaml
-redis:
-  host: 127.0.0.1
-  port: 6379
-  password: ""
-```
+## 8. API 与调试入口
 
-## 🚀 性能测试
+- Swagger：`/swagger/index.html`
+- 验证码：`GET /api/captcha`
+- 登录：`POST /api/login`
+- 注册：`POST /api/register`
 
-### 运行负载测试
+## 9. 质量保障与自检
+
+## 9.1 一键自检（推荐）
+
 ```bash
-# 基础负载测试
-go run tools/load_test.go -url=http://localhost:8080 -c=100 -d=2m
-
-# 自动化性能测试
-chmod +x tools/performance_test.sh
-./tools/performance_test.sh -u http://localhost:8080 -d 5m
+server/tools/self_check.sh
 ```
 
-### 性能监控
+执行内容：
+
+1. `go test ./...`
+2. `go build ./...`
+3. `npm run build-only`
+
+## 9.2 手动检查（可选）
+
 ```bash
-# 健康检查
-curl http://localhost:8080/health
-
-# 性能指标
-curl http://localhost:8080/metrics
-
-# QPS信息
-curl http://localhost:8080/qps
-
-# 性能报告
-curl http://localhost:8080/performance/report
+cd server && go vet ./...
 ```
 
-## 📊 性能对比
+## 10. 已完成优化（近期）
 
-| 指标 | 优化前 | 优化后 | 提升幅度 |
-|------|--------|--------|----------|
-| **QPS** | ~200 | **1000+** | **5x** |
-| **平均响应时间** | ~500ms | **<100ms** | **5x** |
-| **P99响应时间** | ~2s | **<500ms** | **4x** |
-| **错误率** | ~5% | **<1%** | **5x** |
-| **并发处理** | ~50 | **500+** | **10x** |
+- 修复配置文件路径依赖启动目录的问题，增强测试/部署稳定性
+- 修复若干结构体 tag 与不可达代码问题（`go vet` 清零）
+- 修复验证码可复用漏洞（改为一次性消费）
+- 增强登录安全：失败次数限制 + 临时锁定 + 可配置策略
+- 个人中心链路打通：资料映射、改密参数、头像上传闭环
+- 上传接口异常分支补全，避免失败后继续执行
+- 前端构建分包优化，降低主包体积
 
-## 📝 功能模块
+## 11. 演进路线
 
-### 基础功能
-- [x] 用户管理
-- [x] 角色管理
-- [x] 菜单管理
-- [x] 部门管理
-- [x] 岗位管理
-- [x] 操作日志
-- [x] 登录日志
+详见：[docs/EVOLUTION_MATRIX.md](./docs/EVOLUTION_MATRIX.md)
 
-### 性能优化功能
-- [x] RabbitMQ消息队列
-- [x] Redis缓存管理
-- [x] 分布式锁
-- [x] 会话管理
-- [x] API限流
-- [x] 熔断保护
-- [x] 异步日志
-- [x] 性能监控
-- [x] 负载测试
+高优先级方向：
 
-## 🎯 系统启动
+- 字典管理
+- 系统参数中心
+- 定时任务中心
+- 数据权限（按组织维度）
+- 审计增强（变更前后 diff / 风险分级）
 
-### 使用Bootstrap启动
-```go
-package main
+## 12. 开发约定
 
-import (
-    "server/pkg/bootstrap"
-)
+- 新增功能默认补充错误处理和边界验证
+- 新增后端功能至少通过 `go test` + `go build` + `go vet`
+- 前端提交前至少通过 `npm run build-only`
+- 重要改动建议同步更新 `docs/` 文档
 
-func main() {
-    // 创建应用程序实例
-    app, err := bootstrap.NewApplication()
-    if err != nil {
-        log.Fatal("应用程序初始化失败:", err)
-    }
+## 13. License
 
-    // 打印系统信息
-    app.PrintSystemInfo()
-
-    // 启动应用程序
-    if err := app.Start(); err != nil {
-        log.Fatal("应用程序启动失败:", err)
-    }
-
-    // 等待关闭信号
-    app.WaitForShutdown()
-}
-```
-
-## 🔍 监控与运维
-
-### 关键指标监控
-- **QPS**: 实时QPS > 1000
-- **响应时间**: P99 < 500ms
-- **错误率**: < 1%
-- **内存使用**: < 80%
-- **连接池**: 使用率 < 90%
-
-### 告警设置
-- QPS下降超过20%
-- 响应时间超过1秒
-- 错误率超过5%
-- 内存使用超过90%
-- 连接池耗尽
-
-## 🤝 贡献指南
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 打开 Pull Request
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
+MIT

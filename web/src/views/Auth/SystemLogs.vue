@@ -313,11 +313,15 @@ const currentPageTitle = ref('系统日志')
 // 定义接口类型
 interface OperationLog {
   id: number
+  title?: string
   username: string
   method: string
   url: string
   ip: string
   createTime: string
+  operParam?: string
+  jsonResult?: string
+  errorMsg?: string
 }
 
 interface LoginLog {
@@ -458,24 +462,22 @@ const getOperationLogs = async () => {
       {
         id: 1,
         title: '用户登录',
-        operName: 'admin',
-        requestMethod: 'POST',
-        operUrl: '/api/login',
-        operIp: '192.168.1.100',
-        status: 0,
-        operTime: new Date().toISOString(),
+        username: 'admin',
+        method: 'POST',
+        url: '/api/login',
+        ip: '192.168.1.100',
+        createTime: new Date().toISOString(),
         operParam: '{"username":"admin","password":"******"}',
         jsonResult: '{"code":200,"message":"登录成功"}'
       },
       {
         id: 2,
         title: '添加用户',
-        operName: 'admin',
-        requestMethod: 'POST',
-        operUrl: '/api/admin/add',
-        operIp: '192.168.1.100',
-        status: 0,
-        operTime: new Date(Date.now() - 3600000).toISOString(),
+        username: 'admin',
+        method: 'POST',
+        url: '/api/admin/add',
+        ip: '192.168.1.100',
+        createTime: new Date(Date.now() - 3600000).toISOString(),
         operParam: '{"username":"test","phone":"13800138000"}',
         jsonResult: '{"code":200,"message":"添加成功"}'
       }
@@ -519,24 +521,24 @@ const getLoginLogs = async () => {
     loginLogs.value = [
       {
         id: 1,
-        userName: 'admin',
-        ipaddr: '192.168.1.100',
+        username: 'admin',
+        ipAddress: '192.168.1.100',
         loginLocation: '北京市',
         browser: 'Chrome 120.0',
         os: 'Windows 10',
-        status: 1,
-        msg: '登录成功',
+        loginStatus: 1,
+        message: '登录成功',
         loginTime: new Date().toISOString()
       },
       {
         id: 2,
-        userName: 'test',
-        ipaddr: '192.168.1.101',
+        username: 'test',
+        ipAddress: '192.168.1.101',
         loginLocation: '上海市',
         browser: 'Firefox 119.0',
         os: 'macOS 14.0',
-        status: 2,
-        msg: '密码错误',
+        loginStatus: 2,
+        message: '密码错误',
         loginTime: new Date(Date.now() - 1800000).toISOString()
       }
     ]

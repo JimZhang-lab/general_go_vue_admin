@@ -24,7 +24,7 @@ func (SysAdmin) TableName() string {
 
 // 鉴权用户结构体
 type JwtAdmin struct {
-	ID       uint   `json :"id"`      //ID
+	ID       uint   `json:"id"`       //ID
 	Username string `json:"username"` //用户名
 	Nickname string `json:"nickname"` //昵称
 	Icon     string `json:"icon"`     //头像
@@ -39,6 +39,18 @@ type LoginDto struct {
 	Password string `json:"password" validate:"required"`          //密码
 	Image    string `json:"image" validate:"required,min=4,max=6"` //验证码
 	IdKey    string `json:"idKey" validate:"required"`             //uuid
+}
+
+// RegisterDto 公开注册参数
+type RegisterDto struct {
+	Username        string `json:"username" validate:"required,min=4,max=20"`  // 用户名
+	Nickname        string `json:"nickname" validate:"omitempty,min=2,max=20"` // 昵称
+	Email           string `json:"email" validate:"omitempty,email"`           // 邮箱
+	Phone           string `json:"phone" validate:"omitempty,min=11,max=11"`   // 手机号
+	Password        string `json:"password" validate:"required,min=6,max=32"`  // 密码
+	ConfirmPassword string `json:"confirmPassword" validate:"required"`        // 确认密码
+	Image           string `json:"image" validate:"required,min=4,max=6"`      // 验证码
+	IdKey           string `json:"idKey" validate:"required"`                  // 验证码ID
 }
 
 // AddSysAdminDto 新增参数
@@ -63,7 +75,7 @@ type SysAdminInfo struct {
 	Status   int    `json:"status"`   // 状态：1->启用,2->禁用
 	PostId   int    `json:"postId"`   // 岗位id
 	DeptId   int    `json:"deptId"`   // 部门id
-	RoleId   uint   `json:"roleId" `  // 角色id
+	RoleId   uint   `json:"roleId"`   // 角色id
 	Email    string `json:"email"`    // 邮箱
 	Phone    string `json:"phone"`    // 手机号
 	Note     string `json:"note"`     // 备注
@@ -108,7 +120,7 @@ type SysAdminVo struct {
 	Status     int         `json:"status"`     // 状态：1->启用,2->禁用
 	PostId     int         `json:"postId"`     // 岗位id
 	DeptId     int         `json:"deptId"`     // 部门id
-	RoleId     uint        `json:"roleId" `    // 角色id
+	RoleId     uint        `json:"roleId"`     // 角色id
 	PostName   string      `json:"postName"`   // 岗位名称
 	DeptName   string      `json:"deptName"`   // 部门名称
 	RoleName   string      `json:"roleName"`   // 角色名称
@@ -123,11 +135,11 @@ type SysAdminVo struct {
 type UpdatePersonalDto struct {
 	Id       uint   //ID
 	Icon     string // 头像
-	Username string `validate:"required"` //用户名
-	Nickname string `validate:"required"` // 昵称
-	Phone    string `validate:"required"` // 电话
-	Email    string `validate:"required"` // 邮箱
-	Note     string `validate:"required"` // 备注
+	Username string `validate:"required,min=4,max=20"`   // 用户名
+	Nickname string `validate:"omitempty,min=2,max=20"`  // 昵称
+	Phone    string `validate:"omitempty,min=11,max=11"` // 电话
+	Email    string `validate:"omitempty,email"`         // 邮箱
+	Note     string `validate:"omitempty,max=500"`       // 备注
 }
 
 // 修改个人密码

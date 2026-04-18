@@ -14,6 +14,8 @@ import (
 	"server/common/utils"
 	"server/pkg/db"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 func SysAdminDetail(dto entity.LoginDto) (sysAdmin entity.SysAdmin) {
@@ -53,6 +55,65 @@ func CreateSysAdmin(dto entity.AddSysAdminDto) bool {
 	entity.RoleId = dto.RoleId
 	db.Db.Create(&entity)
 	return tx.RowsAffected > 0
+}
+
+// CreatePublicSysAdmin 创建公开注册账号
+func CreatePublicSysAdmin(dto entity.RegisterDto, roleID, deptID, postID uint) error {
+	return db.Db.Transaction(func(tx *gorm.DB) error {
+		sysAdmin := entity.SysAdmin{
+			PostId:     int(postID),
+			DeptId:     int(deptID),
+			Username:   dto.Username,
+			Nickname:   dto.Nickname,
+			Password:   utils.EncryptionMd5(dto.Password),
+			Phone:      dto.Phone,
+			Email:      dto.Email,
+			Note:       "自助注册账号",
+			Status:     1,
+			CreateTime: utils.HTime{Time: time.Now()},
+		}
+		if err := tx.Create(&sysAdmin).Error; err != nil {
+			return err
+		}
+
+		adminRole := entity.SysAdminRole{
+			AdminId: sysAdmin.ID,
+			RoleId:  roleID,
+		}
+		return tx.Create(&adminRole).Error
+	})
+}
+
+// GetDefaultRegisterRole 获取注册默认角色
+func GetDefaultRegisterRole() (role entity.SysRole, err error) {
+	err = db.Db.Where("role_key = ? AND status = ?", "admin", 1).First(&role).Error
+	if err == nil {
+		return role, nil
+	}
+	if err != gorm.ErrRecordNotFound {
+		return role, err
+	}
+	err = db.Db.Where("status = ?", 1).Order("id ASC").First(&role).Error
+	return role, err
+}
+
+// GetDefaultRegisterDept 获取注册默认部门
+func GetDefaultRegisterDept() (dept entity.SysDept, err error) {
+	err = db.Db.Where("dept_status = ?", 1).Order("id ASC").First(&dept).Error
+	return dept, err
+}
+
+// GetDefaultRegisterPost 获取注册默认岗位
+func GetDefaultRegisterPost() (post entity.SysPost, err error) {
+	err = db.Db.Where("post_code = ? AND post_status = ?", "ADMIN", 1).First(&post).Error
+	if err == nil {
+		return post, nil
+	}
+	if err != gorm.ErrRecordNotFound {
+		return post, err
+	}
+	err = db.Db.Where("post_status = ?", 1).Order("id ASC").First(&post).Error
+	return post, err
 }
 
 // 根据id查询用户详情
@@ -158,6 +219,9 @@ func UpdatePersonal(dto entity.UpdatePersonalDto) (sysAdmin entity.SysAdmin) {
 	}
 	if dto.Email != "" {
 		sysAdmin.Email = dto.Email
+	}
+	if dto.Note != "" {
+		sysAdmin.Note = dto.Note
 	}
 	db.Db.Save(&sysAdmin)
 	return sysAdmin

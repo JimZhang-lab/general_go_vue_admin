@@ -39,6 +39,17 @@ export const authRoutes: RouteConfig[] = [
     beforeEnter: routeGuards.redirectIfAuthenticated
   },
   {
+    path: '/adminRegister',
+    name: 'AdminRegister',
+    component: () => import('@/views/Auth/Register.vue'),
+    meta: {
+      title: '管理员注册',
+      requiresAuth: false,
+      hideInMenu: true
+    },
+    beforeEnter: routeGuards.redirectIfAuthenticated
+  },
+  {
     path: '/auth',
     name: 'AuthManagement',
     redirect: '/auth/dashboard',

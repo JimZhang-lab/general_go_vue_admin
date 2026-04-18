@@ -63,7 +63,6 @@ func CreateSysDept(sysDept entity.SysDept) bool {
 		db.Db.Create(&sysDept)
 		return true
 	}
-	return false
 }
 
 // 根据id查询部门

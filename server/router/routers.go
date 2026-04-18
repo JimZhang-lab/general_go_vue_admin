@@ -66,6 +66,7 @@ func regsiterAdminPlatformRouter(router *gin.Engine) {
 	// 不需要认证的接口
 	router.GET("/api/captcha", controller.Captcha)
 	router.POST("/api/login", controller.Login)
+	router.POST("/api/register", controller.Register)
 
 	// 需要JWT认证的登出接口
 	router.POST("/api/logout", middleware.AuthMiddleware(), controller.Logout)

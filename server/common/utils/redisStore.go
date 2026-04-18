@@ -34,6 +34,9 @@ func (r RedisStore) Get(id string, clear bool) string {
 	if err != nil {
 		return ""
 	}
+	if clear {
+		_ = redis.RedisDb.Del(ctx, key).Err()
+	}
 	return value
 }
 

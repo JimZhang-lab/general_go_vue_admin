@@ -78,7 +78,7 @@ import { ref, computed } from 'vue'
 
 interface Props {
   modelValue: string | number
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url'
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'date'
   label?: string
   placeholder?: string
   name?: string

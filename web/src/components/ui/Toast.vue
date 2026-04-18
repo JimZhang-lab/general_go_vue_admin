@@ -177,7 +177,7 @@ const close = () => {
   emit('update:modelValue', false)
   clearTimer()
   // 清除当前实例引用
-  if (currentInstance === visible) {
+  if (currentInstance === visible.value) {
     currentInstance = null
   }
 }
@@ -212,7 +212,7 @@ watch(
   () => props.modelValue,
   (newVal) => {
     // 单例模式：如果已经有实例显示且尝试显示新实例，则关闭当前实例
-    if (newVal && currentInstance && currentInstance !== visible) {
+    if (newVal && currentInstance && currentInstance !== visible.value) {
       currentInstance.value = false
     }
     
@@ -227,7 +227,7 @@ watch(
     } else {
       clearTimer()
       // 清除当前实例引用
-      if (currentInstance === visible) {
+      if (currentInstance === visible.value) {
         currentInstance = null
       }
     }
@@ -238,7 +238,7 @@ watch(
 onUnmounted(() => {
   clearTimer()
   // 组件销毁时清除当前实例引用
-  if (currentInstance === visible) {
+  if (currentInstance === visible.value) {
     currentInstance = null
   }
 })

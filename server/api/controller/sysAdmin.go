@@ -15,6 +15,7 @@ import (
 	"server/api/entity"
 	"server/api/service"
 	"server/common/controller"
+	"server/pkg/jwt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -61,6 +62,31 @@ func Login(c *gin.Context) {
 	service.SysAdminService().LoginLegacy(c, dto)
 }
 
+// @Summary 用户注册接口
+// @Produce json
+// @Description 用户注册接口，支持JSON、表单多种数据格式
+// @Param data body entity.RegisterDto true "data"
+// @Success 200 {object} result.Result
+// @router /api/register [post]
+func Register(c *gin.Context) {
+	ctrl := &SysAdminController{}
+
+	var dto entity.RegisterDto
+	if err := ctrl.BindRequest(c, &dto); err != nil {
+		ctrl.FailedWithError(c, err)
+		return
+	}
+
+	traceID := ctrl.GetTraceID(c)
+	if traceID == "" {
+		traceID = generateTraceID()
+		ctrl.SetTraceID(c, traceID)
+	}
+
+	ctrl.LogRequest(c, "Register", dto)
+	service.SysAdminService().RegisterLegacy(c, dto)
+}
+
 // @Summary 用户登出接口
 // @Produce json
 // @Description 用户登出接口
@@ -103,12 +129,17 @@ func CreateSysAdmin(c *gin.Context) {
 // @Summary 根据id查询用户接口
 // @Produce json
 // @Description 根据id查询用户接口
-// @Param id query int true "Id"
+// @Param id query int false "Id"
 // @Success 200 {object} result.Result
 // @router /api/admin/info [get]
 // @Security ApiKeyAuth
 func GetSysAdminInfo(c *gin.Context) {
 	Id, _ := strconv.Atoi(c.Query("id"))
+	if Id <= 0 {
+		if currentUserID, err := jwt.GetAdminId(c); err == nil {
+			Id = int(currentUserID)
+		}
+	}
 	service.SysAdminService().GetSysAdminInfo(c, Id)
 }
 

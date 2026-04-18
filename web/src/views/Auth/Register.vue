@@ -102,30 +102,30 @@
             <div class="flex items-start justify-between gap-4">
               <div>
                 <p class="text-sm font-semibold uppercase tracking-[0.32em] text-cyan-600">管理员入口</p>
-                <h2 class="mt-3 text-3xl font-semibold text-slate-900">登录后台</h2>
+                <h2 class="mt-3 text-3xl font-semibold text-slate-900">创建账号</h2>
                 <p class="mt-3 text-sm leading-7 text-slate-500">
-                  输入管理员账号、密码和验证码后进入系统。如果还没有账号，可以先注册。
+                  仅需填写必要信息即可注册，注册成功后将自动回到登录页。
                 </p>
               </div>
               <div class="hidden h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-[0_10px_25px_rgba(14,116,144,0.35)] sm:flex">
-                <ShieldCheckIcon class="h-7 w-7" />
+                <UserPlusIcon class="h-7 w-7" />
               </div>
             </div>
 
-            <form class="mt-8 space-y-5" novalidate @submit.prevent="loginBtn">
+            <form class="mt-8 space-y-5" novalidate @submit.prevent="submitRegister">
               <div>
-                <label for="login-username" class="mb-2 block text-sm font-medium text-slate-700">账号</label>
+                <label for="register-username" class="mb-2 block text-sm font-medium text-slate-700">账号</label>
                 <div class="relative">
                   <UserCircleIcon class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                   <input
-                    id="login-username"
-                    v-model="loginForm.username"
+                    id="register-username"
+                    v-model="registerForm.username"
                     autocomplete="username"
                     type="text"
-                    placeholder="请输入 4-20 位账号"
+                    placeholder="4-20 位字母、数字或下划线"
                     :class="inputClass('username')"
                     @blur="validateField('username')"
-                    @input="handleUsernameInput"
+                    @input="handleTextInput('username')"
                   />
                 </div>
                 <p v-if="fieldErrors.username" class="mt-2 text-xs font-medium text-rose-500">
@@ -133,37 +133,87 @@
                 </p>
               </div>
 
-              <div>
-                <label for="login-password" class="mb-2 block text-sm font-medium text-slate-700">密码</label>
-                <div class="relative">
-                  <KeyIcon class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                  <input
-                    id="login-password"
-                    v-model="loginForm.password"
-                    autocomplete="current-password"
-                    :type="showPassword ? 'text' : 'password'"
-                    placeholder="请输入密码"
-                    :class="inputClass('password')"
-                    @blur="validateField('password')"
-                    @input="handleFieldInput('password')"
-                  />
-                  <button
-                    type="button"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
-                    @click="showPassword = !showPassword"
-                  >
-                    <EyeIcon v-if="!showPassword" class="h-5 w-5" />
-                    <EyeSlashIcon v-else class="h-5 w-5" />
-                  </button>
+              <div class="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label for="register-password" class="mb-2 block text-sm font-medium text-slate-700">密码</label>
+                  <div class="relative">
+                    <KeyIcon class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="register-password"
+                      v-model="registerForm.password"
+                      autocomplete="new-password"
+                      :type="showPassword ? 'text' : 'password'"
+                      placeholder="至少 6 位，包含字母和数字"
+                      :class="inputClass('password')"
+                      @blur="validateField('password')"
+                      @input="handlePasswordInput"
+                    />
+                    <button
+                      type="button"
+                      class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                      @click="showPassword = !showPassword"
+                    >
+                      <EyeIcon v-if="!showPassword" class="h-5 w-5" />
+                      <EyeSlashIcon v-else class="h-5 w-5" />
+                    </button>
+                  </div>
+                  <p v-if="fieldErrors.password" class="mt-2 text-xs font-medium text-rose-500">
+                    {{ fieldErrors.password }}
+                  </p>
                 </div>
-                <p v-if="fieldErrors.password" class="mt-2 text-xs font-medium text-rose-500">
-                  {{ fieldErrors.password }}
-                </p>
+
+                <div>
+                  <label for="register-confirm-password" class="mb-2 block text-sm font-medium text-slate-700">确认密码</label>
+                  <div class="relative">
+                    <ShieldCheckIcon class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="register-confirm-password"
+                      v-model="registerForm.confirmPassword"
+                      autocomplete="new-password"
+                      :type="showConfirmPassword ? 'text' : 'password'"
+                      placeholder="请再次输入密码"
+                      :class="inputClass('confirmPassword')"
+                      @blur="validateField('confirmPassword')"
+                      @input="handleTextInput('confirmPassword')"
+                    />
+                    <button
+                      type="button"
+                      class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                      @click="showConfirmPassword = !showConfirmPassword"
+                    >
+                      <EyeIcon v-if="!showConfirmPassword" class="h-5 w-5" />
+                      <EyeSlashIcon v-else class="h-5 w-5" />
+                    </button>
+                  </div>
+                  <p v-if="fieldErrors.confirmPassword" class="mt-2 text-xs font-medium text-rose-500">
+                    {{ fieldErrors.confirmPassword }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="rounded-2xl border border-cyan-100 bg-cyan-50/50 px-4 py-4">
+                <div class="flex items-center justify-between gap-4">
+                  <div>
+                    <p class="text-sm font-medium text-slate-700">密码强度</p>
+                    <p class="mt-1 text-xs text-slate-500">{{ passwordStrength.label }}</p>
+                  </div>
+                  <span class="rounded-full px-3 py-1 text-xs font-semibold" :class="passwordStrength.badgeClass">
+                    {{ passwordStrength.tag }}
+                  </span>
+                </div>
+                <div class="mt-3 grid grid-cols-4 gap-2">
+                  <span
+                    v-for="index in 4"
+                    :key="index"
+                    class="h-2 rounded-full"
+                    :class="index <= passwordStrength.score ? passwordStrength.barClass : 'bg-slate-200'"
+                  ></span>
+                </div>
               </div>
 
               <div>
                 <div class="mb-2 flex items-center justify-between gap-3">
-                  <label for="login-captcha" class="block text-sm font-medium text-slate-700">验证码</label>
+                  <label for="register-captcha" class="block text-sm font-medium text-slate-700">验证码</label>
                   <button
                     type="button"
                     class="inline-flex items-center gap-1 text-xs font-medium text-cyan-600 transition hover:text-cyan-700"
@@ -176,16 +226,16 @@
 
                 <div class="grid gap-3 sm:grid-cols-[1fr_160px]">
                   <div class="relative">
-                    <ShieldCheckIcon class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                    <SparklesIcon class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                     <input
-                      id="login-captcha"
-                      v-model="loginForm.captcha"
+                      id="register-captcha"
+                      v-model="registerForm.captcha"
                       autocomplete="off"
                       type="text"
                       placeholder="请输入验证码"
                       :class="inputClass('captcha')"
                       @blur="validateField('captcha')"
-                      @input="handleFieldInput('captcha')"
+                      @input="handleTextInput('captcha')"
                     />
                   </div>
 
@@ -203,7 +253,7 @@
                     <img
                       v-else-if="captchaImage"
                       :src="captchaImage"
-                      alt="登录验证码"
+                      alt="注册验证码"
                       class="h-full w-full object-contain px-3"
                     />
                     <span
@@ -212,7 +262,7 @@
                     >
                       点击获取
                     </span>
-                    <span class="absolute inset-x-0 bottom-1 text-[11px] font-medium text-slate-400 transition group-hover:text-sky-600">
+                    <span class="absolute inset-x-0 bottom-1 text-[11px] font-medium text-slate-400 transition group-hover:text-cyan-600">
                       点击更换
                     </span>
                   </button>
@@ -223,10 +273,15 @@
                 </p>
               </div>
 
-              <div class="flex flex-col gap-3 border-t border-slate-100 pt-1 sm:flex-row sm:items-center sm:justify-between">
-                <label class="inline-flex cursor-pointer items-center gap-3 text-sm text-slate-600">
-                  <input v-model="rememberMe" type="checkbox" class="peer sr-only" />
-                  <span class="flex h-5 w-5 items-center justify-center rounded border border-slate-300 bg-white shadow-sm transition peer-checked:border-cyan-500">
+              <div class="rounded-2xl border border-cyan-100 bg-white/90 px-4 py-3">
+                <label class="inline-flex cursor-pointer items-start gap-3 text-sm leading-6 text-slate-600">
+                  <input
+                    v-model="registerForm.agreeToTerms"
+                    type="checkbox"
+                    class="peer sr-only"
+                    @change="validateField('agreeToTerms')"
+                  />
+                  <span class="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded border border-slate-300 bg-white shadow-sm transition peer-checked:border-cyan-500">
                     <svg
                       class="h-3.5 w-3.5 text-cyan-600 opacity-0 transition peer-checked:opacity-100"
                       viewBox="0 0 14 14"
@@ -242,15 +297,13 @@
                       />
                     </svg>
                   </span>
-                  记住我的登录状态
+                  <span>
+                    我已确认注册后将使用系统默认角色/部门/岗位，并遵守后台账号使用规范。
+                  </span>
                 </label>
-
-                <router-link
-                  to="/adminRegister"
-                  class="text-sm font-medium text-cyan-600 transition hover:text-cyan-700"
-                >
-                  没有账号？去注册
-                </router-link>
+                <p v-if="fieldErrors.agreeToTerms" class="mt-2 text-xs font-medium text-rose-500">
+                  {{ fieldErrors.agreeToTerms }}
+                </p>
               </div>
 
               <button
@@ -258,12 +311,18 @@
                 class="flex h-14 w-full items-center justify-center rounded-2xl bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 text-sm font-semibold text-white shadow-[0_16px_28px_rgba(2,132,199,0.35)] transition hover:from-cyan-500 hover:via-sky-500 hover:to-blue-500 disabled:cursor-not-allowed disabled:from-slate-300 disabled:to-slate-300 disabled:shadow-none"
                 :disabled="submitting"
               >
-                {{ submitting ? '登录中...' : '登录系统' }}
+                {{ submitting ? '注册中...' : '创建账号' }}
               </button>
             </form>
 
-            <div class="mt-6 rounded-2xl border border-cyan-100 bg-cyan-50/60 px-4 py-3 text-xs leading-6 text-slate-600">
-              登录失败时会自动刷新验证码；当账号不存在或密码错误时，统一提示为“密码或账号错误”。
+            <div class="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-sm text-slate-500">已经有账号了？直接返回登录继续。</p>
+              <router-link
+                to="/adminLogin"
+                class="inline-flex items-center justify-center rounded-2xl border border-cyan-100 px-4 py-2 text-sm font-medium text-cyan-700 transition hover:border-cyan-300 hover:text-cyan-800"
+              >
+                返回登录
+              </router-link>
             </div>
           </div>
         </div>
@@ -273,8 +332,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   ArrowPathIcon,
   CheckCircleIcon,
@@ -282,12 +341,12 @@ import {
   EyeSlashIcon,
   KeyIcon,
   ShieldCheckIcon,
-  UserCircleIcon
+  SparklesIcon,
+  UserCircleIcon,
+  UserPlusIcon
 } from '@heroicons/vue/24/outline'
 import adminApi from '@/api/system'
 import ToastAlert from '@/composables/ToastAlert'
-import { useMainStore } from '@/store'
-import { AuthUtils } from '@/utils/auth'
 import {
   CAPTCHA_PATTERN,
   PASSWORD_PATTERN,
@@ -295,14 +354,17 @@ import {
   getRequestErrorMessage
 } from '@/utils/authForms'
 
-type LoginField = 'username' | 'password' | 'captcha'
+type RegisterField =
+  | 'username'
+  | 'password'
+  | 'confirmPassword'
+  | 'captcha'
+  | 'agreeToTerms'
 
 const router = useRouter()
-const route = useRoute()
-const store = useMainStore()
 
 const showPassword = ref(false)
-const rememberMe = ref(AuthUtils.isKeepLoggedIn())
+const showConfirmPassword = ref(false)
 const submitting = ref(false)
 const loadingCaptcha = ref(false)
 const captchaImage = ref('')
@@ -322,46 +384,107 @@ const showcaseItems = [
   }
 ]
 
-const loginForm = reactive({
+const registerForm = reactive({
   username: '',
   password: '',
+  confirmPassword: '',
   captcha: '',
-  idKey: ''
+  idKey: '',
+  agreeToTerms: false
 })
 
-const fieldErrors = reactive<Record<LoginField, string>>({
+const fieldErrors = reactive<Record<RegisterField, string>>({
   username: '',
   password: '',
-  captcha: ''
+  confirmPassword: '',
+  captcha: '',
+  agreeToTerms: ''
 })
 
-const inputClass = (field: LoginField) => {
+const inputClass = (field: Exclude<RegisterField, 'agreeToTerms'>) => {
   const baseClass =
     'h-14 w-full rounded-2xl border bg-white pl-12 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:ring-4'
 
   return fieldErrors[field]
     ? `${baseClass} border-rose-300 focus:border-rose-400 focus:ring-rose-100`
-    : `${baseClass} border-slate-200 focus:border-sky-400 focus:ring-sky-100`
+    : `${baseClass} border-slate-200 focus:border-cyan-400 focus:ring-cyan-100`
 }
 
-const validateField = (field: LoginField) => {
-  const username = loginForm.username.trim()
-  const captcha = loginForm.captcha.trim()
+const passwordStrength = computed(() => {
+  const value = registerForm.password
+  let score = 0
 
-  const validators: Record<LoginField, () => string> = {
+  if (value.length >= 6) score += 1
+  if (/[A-Za-z]/.test(value) && /\d/.test(value)) score += 1
+  if (/[^\w]/.test(value)) score += 1
+  if (value.length >= 10) score += 1
+
+  if (score <= 1) {
+    return {
+      score,
+      label: '建议至少 6 位，并同时包含字母和数字。',
+      tag: '较弱',
+      barClass: 'bg-rose-400',
+      badgeClass: 'bg-rose-50 text-rose-600'
+    }
+  }
+
+  if (score === 2) {
+    return {
+      score,
+      label: '基础可用，继续增加长度或符号会更稳妥。',
+      tag: '一般',
+      barClass: 'bg-amber-400',
+      badgeClass: 'bg-amber-50 text-amber-600'
+    }
+  }
+
+  if (score === 3) {
+    return {
+      score,
+      label: '已经比较可靠，适合作为后台账号密码。',
+      tag: '良好',
+      barClass: 'bg-cyan-500',
+      badgeClass: 'bg-cyan-50 text-cyan-700'
+    }
+  }
+
+  return {
+    score,
+    label: '强度较高，请妥善保管账号凭据。',
+    tag: '很强',
+    barClass: 'bg-emerald-500',
+    badgeClass: 'bg-emerald-50 text-emerald-700'
+  }
+})
+
+const validateField = (field: RegisterField) => {
+  const username = registerForm.username.trim()
+  const captcha = registerForm.captcha.trim()
+
+  const validators: Record<RegisterField, () => string> = {
     username: () => {
       if (!username) return '请输入账号'
       if (!USERNAME_PATTERN.test(username)) return '账号需为 4-20 位字母、数字或下划线'
       return ''
     },
     password: () => {
-      if (!loginForm.password) return '请输入密码'
-      if (!PASSWORD_PATTERN.test(loginForm.password)) return '密码需至少 6 位，且包含字母和数字'
+      if (!registerForm.password) return '请输入密码'
+      if (!PASSWORD_PATTERN.test(registerForm.password)) return '密码需至少 6 位，且包含字母和数字'
+      return ''
+    },
+    confirmPassword: () => {
+      if (!registerForm.confirmPassword) return '请再次输入密码'
+      if (registerForm.confirmPassword !== registerForm.password) return '两次输入的密码不一致'
       return ''
     },
     captcha: () => {
       if (!captcha) return '请输入验证码'
       if (!CAPTCHA_PATTERN.test(captcha)) return '验证码需为 4-6 位字母或数字'
+      return ''
+    },
+    agreeToTerms: () => {
+      if (!registerForm.agreeToTerms) return '请先确认注册规范'
       return ''
     }
   }
@@ -372,24 +495,33 @@ const validateField = (field: LoginField) => {
 }
 
 const validateForm = () => {
-  const fields: LoginField[] = ['username', 'password', 'captcha']
+  const fields: RegisterField[] = [
+    'username',
+    'password',
+    'confirmPassword',
+    'captcha',
+    'agreeToTerms'
+  ]
+
   return fields.every((field) => validateField(field))
 }
 
-const handleUsernameInput = () => {
-  loginForm.username = loginForm.username.replace(/\s+/g, '')
-  if (fieldErrors.username) {
-    validateField('username')
-  }
-}
-
-const handleFieldInput = (field: LoginField) => {
-  if (field === 'captcha') {
-    loginForm.captcha = loginForm.captcha.replace(/\s+/g, '')
+const handleTextInput = (field: Exclude<RegisterField, 'agreeToTerms'>) => {
+  if (field === 'username' || field === 'captcha') {
+    registerForm[field] = registerForm[field].replace(/\s+/g, '')
   }
 
   if (fieldErrors[field]) {
     validateField(field)
+  }
+}
+
+const handlePasswordInput = () => {
+  if (fieldErrors.password) {
+    validateField('password')
+  }
+  if (registerForm.confirmPassword) {
+    validateField('confirmPassword')
   }
 }
 
@@ -401,10 +533,10 @@ const getCaptcha = async (clearValue = true) => {
 
     if (res.code === 200) {
       captchaImage.value = res.data.image
-      loginForm.idKey = res.data.idKey
+      registerForm.idKey = res.data.idKey
 
       if (clearValue) {
-        loginForm.captcha = ''
+        registerForm.captcha = ''
         fieldErrors.captcha = ''
       }
       return
@@ -426,7 +558,7 @@ const getCaptcha = async (clearValue = true) => {
   }
 }
 
-const loginBtn = async () => {
+const submitRegister = async () => {
   if (submitting.value) {
     return
   }
@@ -443,61 +575,39 @@ const loginBtn = async () => {
   submitting.value = true
 
   try {
-    const { data: res } = await adminApi.login({
-      username: loginForm.username.trim(),
-      password: loginForm.password,
-      image: loginForm.captcha.trim(),
-      idKey: loginForm.idKey
+    const { data: res } = await adminApi.register({
+      username: registerForm.username.trim(),
+      password: registerForm.password,
+      confirmPassword: registerForm.confirmPassword,
+      image: registerForm.captcha.trim(),
+      idKey: registerForm.idKey
     })
 
     if (res.code !== 200) {
-      throw new Error(res.message || '登录失败，请重试')
+      throw new Error(res.message || '注册失败，请稍后重试')
     }
 
-    store.saveSysAdmin(res.data.sysAdmin)
-    store.saveToken(res.data.token)
-    store.saveLeftMenuList(res.data.leftMenuList || [])
-    store.savePermissionList(res.data.permissionList || [])
-
-    AuthUtils.setKeepLoggedIn(rememberMe.value)
-    AuthUtils.refreshSession()
-
     ToastAlert.success({
-      title: '登录成功',
-      message: '正在进入后台...',
-      duration: 1400,
+      title: '注册成功',
+      message: '即将返回登录页',
+      duration: 1500,
       blurBackground: false
     })
 
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/auth/dashboard'
     setTimeout(() => {
-      router.push(redirect)
+      router.push({
+        path: '/adminLogin',
+        query: {
+          username: registerForm.username.trim()
+        }
+      })
     }, 900)
   } catch (error) {
-    const message = getRequestErrorMessage(error, '登录失败，请稍后重试')
-
-    if (message === '密码或账号错误') {
-      ToastAlert.error({
-        title: '密码或账号错误',
-        message: '请检查后重新输入',
-        blurBackground: false
-      })
-      loginForm.password = ''
-    } else if (message.includes('登录尝试过于频繁')) {
-      ToastAlert.error({
-        title: '登录受限',
-        message,
-        blurBackground: false
-      })
-      loginForm.password = ''
-    } else {
-      ToastAlert.error({
-        title: '登录失败',
-        message,
-        blurBackground: false
-      })
-    }
-
+    ToastAlert.error({
+      title: '注册失败',
+      message: getRequestErrorMessage(error, '注册失败，请稍后重试'),
+      blurBackground: false
+    })
     await getCaptcha()
   } finally {
     submitting.value = false
@@ -505,10 +615,6 @@ const loginBtn = async () => {
 }
 
 onMounted(() => {
-  const username = typeof route.query.username === 'string' ? route.query.username : ''
-  if (username) {
-    loginForm.username = username
-  }
   getCaptcha(false)
 })
 </script>
@@ -580,7 +686,6 @@ onMounted(() => {
 }
 
 .line-one {
-  --line-opacity: 0.58;
   animation-delay: -2s;
 }
 

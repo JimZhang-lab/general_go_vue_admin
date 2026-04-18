@@ -50,7 +50,7 @@ func CaptMake() (id, b64s string) {
 
 func CaptVerify(id, capt string) bool {
 	// var storeInstance utils.RedisStore
-	if store.Verify(id, capt, false) {
+	if store.Verify(id, capt, true) {
 		return true
 	} else {
 		return false

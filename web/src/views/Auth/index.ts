@@ -12,11 +12,14 @@ export { default as PermissionManagement } from './PermissionManagement.vue'
 export { default as Profile } from './Profile.vue'
 export { default as SystemLogs } from './SystemLogs.vue'
 
-// 导出路由配置
-export { authRoutes, checkPermission, filterMenusByPermission } from '@/router/auth'
+import { authRoutes, checkPermission, filterMenusByPermission } from '@/router/auth'
+import { routeGuards, AuthUtils as RuntimeAuthUtils } from '@/utils/auth'
 
-// 导出权限相关工具函数
-export { AuthUtils, routeGuards } from '@/utils/auth'
+// 导出路由配置
+export { authRoutes, checkPermission, filterMenusByPermission }
+
+// 导出运行时认证工具（避免与本模块同名工具冲突）
+export { routeGuards, RuntimeAuthUtils }
 
 // Auth模块的类型定义
 export interface AuthModule {

@@ -119,6 +119,32 @@ interface LoginData {
   idKey: string;  // 验证码ID
 }
 
+interface RegisterData {
+  username: string;
+  nickname?: string;
+  email?: string;
+  phone?: string;
+  password: string;
+  confirmPassword: string;
+  image: string;
+  idKey: string;
+}
+
+interface UpdateProfileData {
+  username: string;
+  nickname?: string;
+  phone?: string;
+  email?: string;
+  note?: string;
+  icon?: string;
+}
+
+interface ChangePasswordData {
+  password: string;
+  newPassword: string;
+  resetPassword: string;
+}
+
 interface LoginResponse {
   code: number;
   message: string;
@@ -154,7 +180,22 @@ class AdminApi{
       return request({
         url: '/login',
         method: 'post',
-        data
+        data,
+        headers: {
+          isToken: false
+        }
+      })
+    }
+
+    // 注册接口
+    register(data: RegisterData): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/register',
+        method: 'post',
+        data,
+        headers: {
+          isToken: false
+        }
       })
     }
 
@@ -245,16 +286,17 @@ class AdminApi{
       })
     }
 
-    // 获取当前用户信息(后端未提供此接口，保留占位)
-    getCurrentUser(): Promise<{ data: ApiResponse }> {
+    // 获取当前用户信息（不传id时后端默认返回当前登录用户）
+    getCurrentUser(id?: number): Promise<{ data: ApiResponse }> {
       return request({
         url: '/admin/info',
-        method: 'get'
+        method: 'get',
+        params: id ? { id } : undefined
       })
     }
 
     // 更新个人信息
-    updateProfile(data: any): Promise<{ data: ApiResponse }> {
+    updateProfile(data: UpdateProfileData): Promise<{ data: ApiResponse }> {
       return request({
         url: '/admin/updatePersonal',
         method: 'put',
@@ -263,11 +305,23 @@ class AdminApi{
     }
 
     // 修改个人密码
-    changePassword(data: { password: string; newPassword: string; resetPassword: string }): Promise<{ data: ApiResponse }> {
+    changePassword(data: ChangePasswordData): Promise<{ data: ApiResponse }> {
       return request({
         url: '/admin/updatePersonalPassword',
         method: 'put',
         data
+      })
+    }
+
+    // 上传文件
+    uploadFile(data: FormData): Promise<{ data: ApiResponse<string> }> {
+      return request({
+        url: '/upload',
+        method: 'post',
+        data,
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       })
     }
 
@@ -400,8 +454,9 @@ class AdminApi{
     // 删除部门
     deleteDept(id: number): Promise<{ data: ApiResponse }> {
       return request({
-        url: `/api/dept/delete/${id}`,
-        method: 'delete'
+        url: '/dept/delete',
+        method: 'delete',
+        data: { id }
       })
     }
 

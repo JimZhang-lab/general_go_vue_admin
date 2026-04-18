@@ -43,4 +43,43 @@ export default defineConfig({
       }
     },
   },
+  build: {
+    // charts-core（ApexCharts）体积较大，提升告警阈值避免CI噪音
+    chunkSizeWarningLimit: 650,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+
+          if (id.includes('/vue/') || id.includes('/vue-router/') || id.includes('/pinia/')) {
+            return 'framework'
+          }
+
+          if (id.includes('/@fullcalendar/')) {
+            return 'calendar'
+          }
+
+          if (id.includes('/apexcharts/')) {
+            return 'charts-core'
+          }
+
+          if (id.includes('/vue3-apexcharts/')) {
+            return 'charts-vue'
+          }
+
+          if (id.includes('/axios/') || id.includes('/qs/')) {
+            return 'network'
+          }
+
+          if (id.includes('/@heroicons/') || id.includes('/lucide-vue-next/')) {
+            return 'icons'
+          }
+
+          if (id.includes('/dropzone/') || id.includes('/flatpickr/') || id.includes('/swiper/')) {
+            return 'ui-kit'
+          }
+        }
+      }
+    }
+  }
 })

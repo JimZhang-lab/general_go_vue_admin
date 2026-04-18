@@ -46,6 +46,13 @@ rabbitmq:
   reconnectDelay: 5s
   maxReconnectAttempts: 10
 
+# 登录安全策略
+security:
+  # 连续失败达到阈值后触发临时锁定
+  loginFailedAttemptLimit: 5
+  # 锁定时长（分钟）
+  loginLockMinutes: 15
+
 # 图片地址和ip
 imageSettings:
 # 本地磁盘地址
