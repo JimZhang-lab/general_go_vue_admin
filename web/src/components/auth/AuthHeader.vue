@@ -140,15 +140,16 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useSidebar } from '@/composables/useSidebar'
 import ThemeToggler from '../common/ThemeToggler.vue'
 import AuthHeaderLogo from './AuthHeaderLogo.vue'
 import AuthSearchBar from './AuthSearchBar.vue'
 import AuthNotificationMenu from './AuthNotificationMenu.vue'
 import AuthUserMenu from './AuthUserMenu.vue'
-import ToastAlert from '@/composables/ToastAlert'
 
 const { toggleSidebar, toggleMobileSidebar, isMobileOpen } = useSidebar()
+const router = useRouter()
 
 const handleToggle = () => {
   if (window.innerWidth >= 1024) {
@@ -166,10 +167,7 @@ const toggleApplicationMenu = () => {
 
 // 打开系统设置
 const openSettings = () => {
-  ToastAlert.info({
-    title: '系统设置',
-    message: '系统设置功能正在开发中...'
-  })
+  router.push('/auth/settings/basic')
 }
 </script>
 

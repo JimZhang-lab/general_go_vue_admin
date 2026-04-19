@@ -2,8 +2,8 @@
  * @Author: JimZhang
  * @Date: 2025-05-15 15:06:52
  * @LastEditors: 很拉风的James
- * @LastEditTime: 2025-07-27 21:21:24
- * @FilePath: /go-vue-general-admin/web/vite.config.ts
+ * @LastEditTime: 2026-04-19 11:51:17
+ * @FilePath: /general_go_vue_admin/web/vite.config.ts
  * @Description: 
  * 
  */
@@ -37,7 +37,7 @@ export default defineConfig({
     // 允许代理
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://localhost:8368',
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, '')
       }

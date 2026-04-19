@@ -186,14 +186,6 @@ const menuItems = [
     icon: 'div', // DocumentTextIcon
     iconBg: 'bg-orange-50 dark:bg-orange-500/15',
     iconColor: 'text-orange-600 dark:text-orange-400'
-  },
-  {
-    href: '/help',
-    text: '帮助中心',
-    description: '获取帮助和支持',
-    icon: 'div', // QuestionMarkCircleIcon
-    iconBg: 'bg-gray-50 dark:bg-gray-500/15',
-    iconColor: 'text-gray-600 dark:text-gray-400'
   }
 ]
 

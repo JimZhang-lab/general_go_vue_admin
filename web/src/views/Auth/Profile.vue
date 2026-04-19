@@ -192,7 +192,7 @@
                 </div>
                 <div class="text-right">
                   <p class="text-sm text-gray-900">{{ formatDate(log.loginTime) }}</p>
-                  <p class="text-xs text-gray-500">{{ log.status === 1 ? '成功' : '失败' }}</p>
+                  <p class="text-xs text-gray-500">{{ log.loginStatus === 1 ? '成功' : '失败' }}</p>
                 </div>
               </div>
             </div>
@@ -284,7 +284,7 @@ interface LoginLog {
   ipAddress: string
   browser: string
   loginTime: string
-  status: number
+  loginStatus: number
 }
 
 // 响应式数据
@@ -371,37 +371,26 @@ const getUserInfo = async () => {
 }
 
 // 获取登录日志
-const getLoginLogs = async () => {
+const getLoginLogs = async (username?: string) => {
   try {
     const { data: res } = await adminApi.getLoginLogs({
       pageNum: 1,
-      pageSize: 10
+      pageSize: 10,
+      username
     })
 
     if (res.code === 200) {
-      loginLogs.value = res.data.list || []
+      if (Array.isArray(res.data)) {
+        loginLogs.value = res.data
+      } else {
+        loginLogs.value = res.data?.list || []
+      }
+    } else {
+      loginLogs.value = []
     }
   } catch (error) {
     console.error('获取登录日志失败:', error)
-    // 模拟一些登录记录
-    loginLogs.value = [
-      {
-        id: 1,
-        loginLocation: '北京市',
-        ipAddress: '192.168.1.100',
-        browser: 'Chrome 120.0',
-        loginTime: new Date().toISOString(),
-        status: 1
-      },
-      {
-        id: 2,
-        loginLocation: '上海市',
-        ipAddress: '192.168.1.101',
-        browser: 'Firefox 119.0',
-        loginTime: new Date(Date.now() - 86400000).toISOString(),
-        status: 1
-      }
-    ]
+    loginLogs.value = []
   }
 }
 
@@ -594,8 +583,8 @@ const uploadAvatar = async () => {
 }
 
 // 组件挂载时获取数据
-onMounted(() => {
-  getUserInfo()
-  getLoginLogs()
+onMounted(async () => {
+  await getUserInfo()
+  await getLoginLogs(userInfo.value.username)
 })
 </script>

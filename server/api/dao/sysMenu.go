@@ -65,6 +65,7 @@ func CreateSysMenu(addSysMenu entity.SysMenu) bool {
 
 // 查询新增选项列表
 func QuerySysMenuVoList() (sysMenuVo []entity.SysMenuVo) {
+	sysMenuVo = make([]entity.SysMenuVo, 0)
 	db.Db.Table("sys_menu").Select("id, menu_name AS label, parent_id").Scan(&sysMenuVo)
 	return sysMenuVo
 }
@@ -123,6 +124,7 @@ func GetSysMenuList(MenuName string, MenuStatus string) (sysMenu []*entity.SysMe
 
 // 当前登录用户左侧菜单级列表
 func QueryMenuVoList(AdminId, MenuId uint) (menuSvo []entity.MenuSvo) {
+	menuSvo = make([]entity.MenuSvo, 0)
 	const status, menuStatus, menuType = 1, 2, 2
 	db.Db.Table("sys_menu sm").
 		Select("sm.menu_name, sm.icon, sm.url").
@@ -142,6 +144,7 @@ func QueryMenuVoList(AdminId, MenuId uint) (menuSvo []entity.MenuSvo) {
 
 // 当前登录用户左侧菜单列表
 func QueryLeftMenuList(Id uint) (leftMenuVo []entity.LeftMenuVo) {
+	leftMenuVo = make([]entity.LeftMenuVo, 0)
 	const status, menuStatus, menuType uint = 1, 2, 1
 	db.Db.Table("sys_menu sm").
 		Select("sm.id, sm.menu_name, sm.url, sm.icon").
@@ -160,6 +163,7 @@ func QueryLeftMenuList(Id uint) (leftMenuVo []entity.LeftMenuVo) {
 
 // 当前登录用户的权限列表
 func QueryPermissionList(Id uint) (valueVo []entity.ValueVo) {
+	valueVo = make([]entity.ValueVo, 0)
 	const status, menuStatus, menuType uint = 1, 2, 1
 	db.Db.Table("sys_menu sm").
 		Select("sm.value").

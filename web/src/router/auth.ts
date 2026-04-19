@@ -56,8 +56,8 @@ export const authRoutes: RouteConfig[] = [
     meta: {
       title: '权限管理',
       icon: 'shield-check',
-      requiresAuth: true,
-      permissions: ['system:auth:view']
+      requiresAuth: true
+      // 移除权限要求，所有已认证用户都可以访问认证管理区域
     },
     children: [
       {
@@ -67,8 +67,8 @@ export const authRoutes: RouteConfig[] = [
         meta: {
           title: '权限总览',
           icon: 'chart-bar',
-          requiresAuth: true,
-          permissions: ['system:auth:view']
+          requiresAuth: true
+          // 移除权限要求，所有已认证用户都可以访问仪表板
         },
         beforeEnter: routeGuards.requireAuth
       },
@@ -134,7 +134,7 @@ export const authRoutes: RouteConfig[] = [
       },
       {
         path: 'profile',
-        name: 'Profile',
+        name: 'AuthProfile',
         component: () => import('@/views/Auth/Profile.vue'),
         meta: {
           title: '个人资料',
@@ -153,6 +153,30 @@ export const authRoutes: RouteConfig[] = [
           icon: 'document-text',
           requiresAuth: true,
           permissions: ['system:log:list']
+        },
+        beforeEnter: routeGuards.requireAuth
+      },
+      {
+        path: 'notifications',
+        name: 'NotificationCenter',
+        component: () => import('@/views/Auth/NotificationCenter.vue'),
+        meta: {
+          title: '通知中心',
+          icon: 'bell',
+          requiresAuth: true,
+          permissions: ['system:notice:list']
+        },
+        beforeEnter: routeGuards.requireAuth
+      },
+      {
+        path: 'settings/:group(basic|security|notification)',
+        name: 'SystemSettings',
+        component: () => import('@/views/Auth/SystemSettings.vue'),
+        meta: {
+          title: '系统设置',
+          icon: 'cog-6-tooth',
+          requiresAuth: true,
+          permissions: ['system:setting:list']
         },
         beforeEnter: routeGuards.requireAuth
       },

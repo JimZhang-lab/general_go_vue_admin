@@ -217,10 +217,11 @@ func GetSysAdminList(c *gin.Context) {
 	PageNum, _ := strconv.Atoi(c.Query("pageNum"))
 	PageSize, _ := strconv.Atoi(c.Query("pageSize"))
 	Username := c.Query("username")
+	Phone := c.Query("phone")
 	Status := c.Query("status")
 	BeginTime := c.Query("beginTime")
 	EndTime := c.Query("endTime")
-	service.SysAdminService().GetSysAdminList(c, PageSize, PageNum, Username, Status, BeginTime, EndTime)
+	service.SysAdminService().GetSysAdminList(c, PageSize, PageNum, Username, Phone, Status, BeginTime, EndTime)
 }
 
 // 修改个人信息

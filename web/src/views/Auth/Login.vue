@@ -454,25 +454,33 @@ const loginBtn = async () => {
       throw new Error(res.message || '登录失败，请重试')
     }
 
+    // 保存用户信息和权限到 store 和 localStorage
     store.saveSysAdmin(res.data.sysAdmin)
     store.saveToken(res.data.token)
     store.saveLeftMenuList(res.data.leftMenuList || [])
     store.savePermissionList(res.data.permissionList || [])
 
+    // 设置会话相关信息
     AuthUtils.setKeepLoggedIn(rememberMe.value)
     AuthUtils.refreshSession()
 
+    // 显示成功提示
     ToastAlert.success({
       title: '登录成功',
       message: '正在进入后台...',
-      duration: 1400,
+      duration: 1200,
       blurBackground: false
     })
 
+    // 获取重定向目标，默认为权限管理仪表板
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/auth/dashboard'
-    setTimeout(() => {
-      router.push(redirect)
-    }, 900)
+    
+    // 延迟导航，确保数据已完全保存且用户看到了成功提示
+    // 使用 Promise 而不是 setTimeout 以获得更好的时序控制
+    await new Promise(resolve => setTimeout(resolve, 800))
+    
+    // 执行路由导航
+    await router.push(redirect)
   } catch (error) {
     const message = getRequestErrorMessage(error, '登录失败，请稍后重试')
 

@@ -51,7 +51,7 @@
               text="重置"
             />
             <AuthButton
-              @click="showAddModal = true"
+              @click="openAddModal"
               variant="success"
               size="md"
               text="添加管理员"
@@ -107,7 +107,7 @@
                           {{ admin.username }}
                         </span>
                         <span class="block text-gray-500 text-theme-xs dark:text-gray-400">
-                          {{ admin.remark || '管理员' }}
+                          {{ admin.note || admin.remark || '管理员' }}
                         </span>
                       </div>
                     </div>
@@ -159,7 +159,7 @@
                             : 'text-green-600 bg-green-50 hover:bg-green-100 dark:bg-green-500/15 dark:text-green-400 dark:hover:bg-green-500/25'
                         ]"
                       >
-                        {{ admin.status === '1' ? '启用' : '禁用' }}
+                        {{ admin.status === '1' ? '禁用' : '启用' }}
                       </button>
                       <button
                         @click="resetPassword(admin)"
@@ -553,6 +553,7 @@ interface Admin {
   deptName?: string
   postName?: string
   status: string
+  note?: string
   remark?: string
   createTime?: string
 }
@@ -615,6 +616,10 @@ const passwordForm = reactive({
   confirmPassword: ''
 })
 
+const USERNAME_PATTERN = /^[a-zA-Z0-9_]{4,20}$/
+const PHONE_PATTERN = /^1[3-9]\d{9}$/
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 // 计算属性 - 可见页码
 const visiblePages = computed(() => {
   const pages = []
@@ -674,15 +679,13 @@ const getAdminList = async () => {
     const { data: res } = await adminApi.getAdminList(params)
     
     if (res.code === 200) {
-      adminList.value = res.data.list || []
+      adminList.value = (res.data.list || []).map((item: Admin & { status?: string | number; note?: string }) => ({
+        ...item,
+        status: String(item.status ?? '1'),
+        remark: item.remark || item.note || ''
+      }))
       pagination.total = res.data.total || 0
       pagination.pages = Math.ceil(pagination.total / pagination.pageSize)
-
-      console.log('管理员列表已加载')
-      // ToastAlert.success({
-      //   title: '获取成功',
-      //   message: '管理员列表已加载'
-      // })
     } else {
       ToastAlert.error({
         title: '获取失败',
@@ -712,13 +715,11 @@ const getDeptList = async () => {
     }
   } catch (error) {
     console.error('获取部门列表失败:', error)
-    // 使用模拟数据作为后备
-    deptList.value = [
-      { id: 1, deptName: '技术部' },
-      { id: 2, deptName: '运营部' },
-      { id: 3, deptName: '市场部' },
-      { id: 4, deptName: '人事部' }
-    ]
+    deptList.value = []
+    ToastAlert.warning({
+      title: '部门数据暂不可用',
+      message: '获取部门列表失败，请稍后重试'
+    })
   }
 }
 
@@ -734,13 +735,11 @@ const getPostList = async () => {
     }
   } catch (error) {
     console.error('获取岗位列表失败:', error)
-    // 使用模拟数据作为后备
-    postList.value = [
-      { id: 1, postName: '系统管理员' },
-      { id: 2, postName: '运营专员' },
-      { id: 3, postName: '市场专员' },
-      { id: 4, postName: '人事专员' }
-    ]
+    postList.value = []
+    ToastAlert.warning({
+      title: '岗位数据暂不可用',
+      message: '获取岗位列表失败，请稍后重试'
+    })
   }
 }
 
@@ -766,12 +765,14 @@ const editAdmin = (admin: Admin) => {
   Object.assign(adminForm, {
     id: admin.id,
     username: admin.username,
+    nickname: admin.nickname || '',
     phone: admin.phone,
     email: admin.email || '',
+    roleId: Number(admin.roleId || 0),
     deptId: admin.deptId || 0,
     postId: admin.postId || 0,
     status: admin.status,
-    remark: admin.remark || ''
+    remark: admin.note || admin.remark || ''
   })
   showEditModal.value = true
 }
@@ -846,9 +847,65 @@ const deleteAdmin = async (admin: Admin) => {
 
 // 提交表单
 const submitForm = async () => {
+  const username = adminForm.username.trim()
+  const phone = adminForm.phone.trim()
+  const email = adminForm.email.trim()
+  const password = adminForm.password.trim()
+  const roleId = Number(adminForm.roleId)
+  const deptId = Number(adminForm.deptId)
+  const postId = Number(adminForm.postId)
+
+  if (!USERNAME_PATTERN.test(username)) {
+    ToastAlert.warning({
+      title: '用户名格式错误',
+      message: '用户名需为 4-20 位字母、数字或下划线'
+    })
+    return
+  }
+
+  if (!PHONE_PATTERN.test(phone)) {
+    ToastAlert.warning({
+      title: '手机号格式错误',
+      message: '请输入正确的 11 位手机号'
+    })
+    return
+  }
+
+  if (email && !EMAIL_PATTERN.test(email)) {
+    ToastAlert.warning({
+      title: '邮箱格式错误',
+      message: '请输入正确的邮箱地址'
+    })
+    return
+  }
+
+  if (showAddModal.value && password.length < 6) {
+    ToastAlert.warning({
+      title: '密码过短',
+      message: '新增管理员密码长度至少为 6 位'
+    })
+    return
+  }
+
+  if (roleId <= 0 || deptId <= 0 || postId <= 0) {
+    ToastAlert.warning({
+      title: '信息不完整',
+      message: '请为管理员选择角色、部门和岗位'
+    })
+    return
+  }
+
   try {
     const isAdd = showAddModal.value
     const apiMethod = isAdd ? adminApi.addAdmin : adminApi.updateAdmin
+
+    adminForm.username = username
+    adminForm.phone = phone
+    adminForm.email = email
+    adminForm.password = password
+    adminForm.deptId = deptId
+    adminForm.postId = postId
+    adminForm.roleId = roleId
 
     const { data: res } = await apiMethod(adminForm)
 
@@ -876,6 +933,14 @@ const submitForm = async () => {
 
 // 提交密码重置
 const submitPasswordReset = async () => {
+  if (passwordForm.password.trim().length < 6) {
+    ToastAlert.error({
+      title: '密码过短',
+      message: '密码长度至少为 6 位'
+    })
+    return
+  }
+
   if (passwordForm.password !== passwordForm.confirmPassword) {
     ToastAlert.error({
       title: '密码不匹配',
@@ -911,18 +976,24 @@ const submitPasswordReset = async () => {
   }
 }
 
-// 关闭模态框
-  // 角色下拉
-  const getRoleOptions = async () => {
-    try {
-      const { data: res } = await adminApi.getRoleSelectList()
-      if (res.code === 200) {
-        roleOptions.value = res.data || []
-      }
-    } catch (e) {
-      console.error('获取角色下拉失败', e)
+// 角色下拉
+const getRoleOptions = async () => {
+  try {
+    const { data: res } = await adminApi.getRoleSelectList()
+    if (res.code === 200) {
+      roleOptions.value = res.data || []
+      return
     }
+    roleOptions.value = []
+  } catch (e) {
+    console.error('获取角色下拉失败', e)
+    roleOptions.value = []
+    ToastAlert.warning({
+      title: '角色数据暂不可用',
+      message: '获取角色列表失败，请稍后重试'
+    })
   }
+}
 
 const closeModal = () => {
   showAddModal.value = false
@@ -940,6 +1011,11 @@ const closeModal = () => {
     status: '1',
     remark: ''
   })
+}
+
+const openAddModal = () => {
+  closeModal()
+  showAddModal.value = true
 }
 
 // 分页操作

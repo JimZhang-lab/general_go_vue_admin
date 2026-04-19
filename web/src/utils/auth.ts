@@ -69,6 +69,31 @@ export class AuthUtils {
   static getToken(): string | null {
     return storage.getItem('token')
   }
+
+  /**
+   * 检查是否具备任一权限
+   * @param permissions 权限数组
+   * @returns {boolean} 是否具备权限
+   */
+  static hasAnyPermission(permissions?: string[]): boolean {
+    // 如果没有指定权限要求，则允许访问
+    if (!permissions || permissions.length === 0) {
+      return true
+    }
+
+    // 获取用户权限列表
+    const permissionList = storage.getItem('permissionList')
+    if (!permissionList) {
+      // 如果未设置权限列表，则返回 false
+      return false
+    }
+
+    // 确保权限列表是数组格式
+    const normalized = Array.isArray(permissionList) ? permissionList : []
+    
+    // 检查用户是否拥有任一所需权限
+    return permissions.some((permission) => normalized.includes(permission))
+  }
   
   /**
    * 登出用户
@@ -146,11 +171,20 @@ export const routeGuards = {
    */
   requireAuth: (to: any, from: any, next: any) => {
     if (AuthUtils.isAuthenticated() && AuthUtils.isSessionActive()) {
+      // 用户已登录且会话活跃
+      
+      // 检查权限
+      if (to.meta?.permissions && !AuthUtils.hasAnyPermission(to.meta?.permissions)) {
+        // 权限不足，重定向到有权限的页面（通常是个人资料页）
+        next('/auth/profile')
+        return
+      }
+      
       // 刷新会话
       AuthUtils.refreshSession()
       next()
     } else {
-      // 未登录，重定向到登录页
+      // 未登录，重定向到登录页，并保存目标地址供登录后使用
       next({
         path: '/adminLogin',
         query: { redirect: to.fullPath }

@@ -26,7 +26,7 @@ func GetSysOperationLogList(Username, BeginTime, EndTime string, PageSize, PageN
 
 // 根据id删除操作日志
 func DeleteSysOperationLogById(dto entity.SysOperationLogIdDto) {
-	db.Db.Delete(&entity.SysOperationLog{}, dto)
+	db.Db.Delete(&entity.SysOperationLog{}, dto.Id)
 }
 
 // 批量删除批量操作日志

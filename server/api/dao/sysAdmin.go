@@ -181,15 +181,18 @@ func ResetSysAdminPassword(dto entity.ResetSysAdminPasswordDto) {
 }
 
 // 分页查询用户列表
-func GetSysAdminList(PageSize, PageNum int, Username, Status, BeginTime, EndTime string) (sysAdminVo []entity.SysAdminVo, count int64) {
+func GetSysAdminList(PageSize, PageNum int, Username, Phone, Status, BeginTime, EndTime string) (sysAdminVo []entity.SysAdminVo, count int64) {
 	curDb := db.Db.Table("sys_admin").
-		Select("sys_admin.*, sys_post.post_name, sys_role.role_name, sys_dept.dept_name").
+		Select("sys_admin.*, sys_admin_role.role_id, sys_post.post_name, sys_role.role_name, sys_dept.dept_name").
 		Joins("LEFT JOIN sys_post ON sys_admin.post_id = sys_post.id").
 		Joins("LEFT JOIN sys_admin_role ON sys_admin.id = sys_admin_role.admin_id").
 		Joins("LEFT JOIN sys_role ON sys_role.id = sys_admin_role.role_id").
 		Joins("LEFT JOIN sys_dept ON sys_dept.id = sys_admin.dept_id")
 	if Username != "" {
 		curDb = curDb.Where("sys_admin.username = ?", Username)
+	}
+	if Phone != "" {
+		curDb = curDb.Where("sys_admin.phone LIKE ?", "%"+Phone+"%")
 	}
 	if Status != "" {
 		curDb = curDb.Where("sys_admin.status = ?", Status)

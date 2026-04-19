@@ -61,5 +61,5 @@ func DeleteSysLoginInfoById(dto entity.SysLoginInfoIdDto) {
 
 // 清空登录日志
 func CleanSysLoginInfo() {
-	db.Db.Exec("truncate table sys_login_Info")
+	db.Db.Exec("truncate table sys_login_info")
 }

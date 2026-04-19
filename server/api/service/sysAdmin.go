@@ -38,7 +38,7 @@ type ISysAdminService interface {
 	DeleteSysAdminById(ctx context.Context, dto entity.SysAdminIdDto) *service.ServiceResult
 	UpdateSysAdminStatus(ctx context.Context, dto entity.UpdateSysAdminStatusDto) *service.ServiceResult
 	ResetSysAdminPassword(ctx context.Context, dto entity.ResetSysAdminPasswordDto) *service.ServiceResult
-	GetSysAdminList(ctx context.Context, pageSize, pageNum int, username, status, beginTime, endTime string) *service.ServiceResult
+	GetSysAdminList(ctx context.Context, pageSize, pageNum int, username, phone, status, beginTime, endTime string) *service.ServiceResult
 	UpdatePersonal(ctx context.Context, dto entity.UpdatePersonalDto) *service.ServiceResult
 	UpdatePersonalPassword(ctx context.Context, dto entity.UpdatePersonalPasswordDto) *service.ServiceResult
 }
@@ -58,12 +58,12 @@ const (
 )
 
 func getLoginSecurityPolicy() (int64, time.Duration) {
-	limit := int64(config.Config.Security.LoginFailedAttemptLimit)
+	limit := int64(dao.GetSysSettingIntValue("security.login_failed_limit", config.Config.Security.LoginFailedAttemptLimit))
 	if limit <= 0 {
 		limit = defaultLoginFailedAttemptLimit
 	}
 
-	lockMinutes := config.Config.Security.LoginLockMinutes
+	lockMinutes := dao.GetSysSettingIntValue("security.lock_minutes", config.Config.Security.LoginLockMinutes)
 	if lockMinutes <= 0 {
 		lockMinutes = int(defaultLoginLockDuration / time.Minute)
 	}
@@ -199,14 +199,14 @@ func (s SysAdminServiceImpl) UpdatePersonal(c *gin.Context, dto entity.UpdatePer
 }
 
 // 分页查询用户列表
-func (s SysAdminServiceImpl) GetSysAdminList(c *gin.Context, PageSize, PageNum int, Username, Status, BeginTime, EndTime string) {
+func (s SysAdminServiceImpl) GetSysAdminList(c *gin.Context, PageSize, PageNum int, Username, Phone, Status, BeginTime, EndTime string) {
 	if PageSize < 1 {
 		PageSize = 10
 	}
 	if PageNum < 1 {
 		PageNum = 1
 	}
-	sysAdmin, count := dao.GetSysAdminList(PageSize, PageNum, Username, Status, BeginTime, EndTime)
+	sysAdmin, count := dao.GetSysAdminList(PageSize, PageNum, Username, Phone, Status, BeginTime, EndTime)
 	result.Success(c, map[string]interface{}{"total": count, "pageSize": PageSize, "pageNum": PageNum, "list": sysAdmin})
 	return
 }
@@ -257,6 +257,10 @@ func (s SysAdminServiceImpl) CreateSysAdmin(c *gin.Context, dto entity.AddSysAdm
 
 // Register 公开注册账号
 func (s *SysAdminServiceImpl) Register(ctx context.Context, dto entity.RegisterDto) *service.ServiceResult {
+	if !dao.GetSysSettingBoolValue("basic.allow_register", false) {
+		return service.NewServiceResult(nil, errors.ValidationError("当前系统未开放公开注册"))
+	}
+
 	dto.Username = strings.TrimSpace(dto.Username)
 	dto.Nickname = strings.TrimSpace(dto.Nickname)
 	dto.Email = strings.TrimSpace(dto.Email)
@@ -425,9 +429,17 @@ func (s *SysAdminServiceImpl) Login(ctx context.Context, dto entity.LoginDto) *s
 	// 记录登录成功日志
 	dao.CreateSysLoginInfo(dto.Username, ip, utils.GetRealAddressByIP(ip), "", "", "登录成功", 1)
 
-	// 构建权限字符串列表
+	// 构建去重后的权限字符串列表
 	var stringList = make([]string, 0, len(permissionList))
+	permissionSet := make(map[string]struct{}, len(permissionList))
 	for _, value := range permissionList {
+		if value.Value == "" {
+			continue
+		}
+		if _, exists := permissionSet[value.Value]; exists {
+			continue
+		}
+		permissionSet[value.Value] = struct{}{}
 		stringList = append(stringList, value.Value)
 	}
 

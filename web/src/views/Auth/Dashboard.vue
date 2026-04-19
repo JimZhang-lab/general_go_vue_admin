@@ -81,6 +81,9 @@
                 <p class="text-xs text-gray-500 dark:text-gray-400">{{ activity.user }} • {{ activity.time }}</p>
               </div>
             </div>
+            <div v-if="recentActivities.length === 0" class="rounded-lg border border-dashed border-gray-300 p-4 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+              暂无最近活动记录
+            </div>
           </div>
         </ComponentCard>
       </div>
@@ -136,27 +139,27 @@
         <ComponentCard title="系统状态" class="mt-6">
           <div class="space-y-4">
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600 dark:text-gray-400">CPU使用率</span>
-              <span class="text-sm font-medium text-gray-900 dark:text-white/90">{{ systemStatus.cpu }}%</span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">登录成功率</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white/90">{{ systemStatus.loginSuccessRate }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-              <div class="bg-blue-600 h-2 rounded-full" :style="{ width: systemStatus.cpu + '%' }"></div>
+              <div class="bg-blue-600 h-2 rounded-full" :style="{ width: systemStatus.loginSuccessRate + '%' }"></div>
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600 dark:text-gray-400">内存使用率</span>
-              <span class="text-sm font-medium text-gray-900 dark:text-white/90">{{ systemStatus.memory }}%</span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">账号启用率</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white/90">{{ systemStatus.enabledRate }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-              <div class="bg-green-600 h-2 rounded-full" :style="{ width: systemStatus.memory + '%' }"></div>
+              <div class="bg-green-600 h-2 rounded-full" :style="{ width: systemStatus.enabledRate + '%' }"></div>
             </div>
 
             <div class="flex items-center justify-between">
-              <span class="text-sm text-gray-600 dark:text-gray-400">磁盘使用率</span>
-              <span class="text-sm font-medium text-gray-900 dark:text-white/90">{{ systemStatus.disk }}%</span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">在线占比</span>
+              <span class="text-sm font-medium text-gray-900 dark:text-white/90">{{ systemStatus.onlineRate }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-              <div class="bg-orange-600 h-2 rounded-full" :style="{ width: systemStatus.disk + '%' }"></div>
+              <div class="bg-orange-600 h-2 rounded-full" :style="{ width: systemStatus.onlineRate + '%' }"></div>
             </div>
           </div>
         </ComponentCard>
@@ -170,54 +173,177 @@ import { ref, onMounted } from 'vue'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
+import adminApi from '@/api/system'
+import ToastAlert from '@/composables/ToastAlert'
 
 const currentPageTitle = ref('权限管理总览')
 
+interface DashboardStats {
+  adminCount: number
+  roleCount: number
+  permissionCount: number
+  onlineCount: number
+}
+
+interface ActivityItem {
+  id: number
+  action: string
+  user: string
+  time: string
+}
+
+interface SystemStatus {
+  loginSuccessRate: number
+  enabledRate: number
+  onlineRate: number
+}
+
+const resolveList = <T>(payload: unknown): T[] => {
+  if (Array.isArray(payload)) {
+    return payload as T[]
+  }
+  if (payload && typeof payload === 'object') {
+    const list = (payload as { list?: unknown }).list
+    if (Array.isArray(list)) {
+      return list as T[]
+    }
+  }
+  return []
+}
+
+const resolveTotal = (payload: unknown): number => {
+  if (payload && typeof payload === 'object' && 'total' in (payload as Record<string, unknown>)) {
+    const total = Number((payload as { total?: unknown }).total ?? 0)
+    if (Number.isFinite(total)) {
+      return total
+    }
+  }
+  return resolveList(payload).length
+}
+
+const formatRelativeTime = (value?: string): string => {
+  if (!value) {
+    return '刚刚'
+  }
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return '刚刚'
+  }
+  const diff = Date.now() - date.getTime()
+  const minute = 60 * 1000
+  const hour = 60 * minute
+  const day = 24 * hour
+  if (diff < minute) return '刚刚'
+  if (diff < hour) return `${Math.floor(diff / minute)} 分钟前`
+  if (diff < day) return `${Math.floor(diff / hour)} 小时前`
+  return `${Math.floor(diff / day)} 天前`
+}
+
 // 统计数据
 const stats = ref({
-  adminCount: 12,
-  roleCount: 5,
-  permissionCount: 28,
-  onlineCount: 8
-})
+  adminCount: 0,
+  roleCount: 0,
+  permissionCount: 0,
+  onlineCount: 0
+} as DashboardStats)
 
 // 最近活动
-const recentActivities = ref([
-  {
-    id: 1,
-    action: '管理员 admin 登录系统',
-    user: 'admin',
-    time: '2分钟前'
-  },
-  {
-    id: 2,
-    action: '创建了新角色 "编辑员"',
-    user: 'admin',
-    time: '10分钟前'
-  },
-  {
-    id: 3,
-    action: '修改了用户 "test" 的权限',
-    user: 'admin',
-    time: '1小时前'
-  },
-  {
-    id: 4,
-    action: '删除了角色 "临时用户"',
-    user: 'admin',
-    time: '2小时前'
-  }
-])
+const recentActivities = ref<ActivityItem[]>([])
 
 // 系统状态
-const systemStatus = ref({
-  cpu: 45,
-  memory: 68,
-  disk: 32
+const systemStatus = ref<SystemStatus>({
+  loginSuccessRate: 0,
+  enabledRate: 0,
+  onlineRate: 0
 })
 
+const loadDashboardData = async () => {
+  try {
+    const [adminResp, roleResp, menuResp, loginResp, operationResp] = await Promise.all([
+      adminApi.getAdminList({ pageNum: 1, pageSize: 200 }),
+      adminApi.getRoleList({ pageNum: 1, pageSize: 200 }),
+      adminApi.getMenuList({}),
+      adminApi.getLoginLogs({ pageNum: 1, pageSize: 50 }),
+      adminApi.getOperationLogs({ pageNum: 1, pageSize: 8 })
+    ])
+
+    if (
+      adminResp.data.code !== 200 ||
+      roleResp.data.code !== 200 ||
+      menuResp.data.code !== 200 ||
+      loginResp.data.code !== 200 ||
+      operationResp.data.code !== 200
+    ) {
+      throw new Error('部分统计接口返回异常')
+    }
+
+    const adminPayload = adminResp.data.data
+    const rolePayload = roleResp.data.data
+    const menuPayload = menuResp.data.data
+    const loginPayload = loginResp.data.data
+    const operationPayload = operationResp.data.data
+
+    const adminList = resolveList<{ status?: string | number }>(adminPayload)
+    const loginList = resolveList<{ username?: string; loginStatus?: number; loginTime?: string }>(loginPayload)
+    const operationList = resolveList<{ id?: number; username?: string; method?: string; url?: string; createTime?: string }>(operationPayload)
+
+    const onlineThreshold = Date.now() - 30 * 60 * 1000
+    const onlineUsers = new Set(
+      loginList
+        .filter((item) => item.loginStatus === 1 && item.loginTime && new Date(item.loginTime).getTime() >= onlineThreshold)
+        .map((item) => item.username || '')
+        .filter(Boolean)
+    )
+
+    const adminCount = resolveTotal(adminPayload)
+    const roleCount = resolveTotal(rolePayload)
+    const permissionCount = resolveList(menuPayload).length
+    const onlineCount = onlineUsers.size
+
+    stats.value = {
+      adminCount,
+      roleCount,
+      permissionCount,
+      onlineCount
+    }
+
+    const successLogins = loginList.filter((item) => item.loginStatus === 1).length
+    const loginSuccessRate = loginList.length ? Math.round((successLogins / loginList.length) * 100) : 0
+    const enabledAdmins = adminList.filter((item) => Number(item.status) === 1).length
+    const enabledRate = adminList.length ? Math.round((enabledAdmins / adminList.length) * 100) : 0
+    const onlineRate = adminCount > 0 ? Math.round((onlineCount / adminCount) * 100) : 0
+
+    systemStatus.value = {
+      loginSuccessRate,
+      enabledRate,
+      onlineRate
+    }
+
+    if (operationList.length > 0) {
+      recentActivities.value = operationList.map((item, index) => ({
+        id: item.id ?? index + 1,
+        action: `${item.method || '操作'} ${item.url || ''}`.trim(),
+        user: item.username || '未知用户',
+        time: formatRelativeTime(item.createTime)
+      }))
+    } else {
+      recentActivities.value = loginList.slice(0, 8).map((item, index) => ({
+        id: index + 1,
+        action: item.loginStatus === 1 ? '用户登录成功' : '用户登录失败',
+        user: item.username || '未知用户',
+        time: formatRelativeTime(item.loginTime)
+      }))
+    }
+  } catch (error) {
+    console.error('加载总览数据失败:', error)
+    ToastAlert.error({
+      title: '加载失败',
+      message: '权限总览数据加载失败，请稍后重试'
+    })
+  }
+}
+
 onMounted(() => {
-  // 这里可以调用API获取真实数据
-  console.log('Auth Dashboard mounted')
+  loadDashboardData()
 })
 </script>

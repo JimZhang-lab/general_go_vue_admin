@@ -1,239 +1,91 @@
-# General Go Vue Admin
+# 通用后台管理系统 (General Go-Vue Admin)
 
-一个面向生产的后台管理系统，基于 **Go + Vue3 + TypeScript + TailwindCSS**。  
-目标不是“能跑”，而是长期可维护、可演进、可观测、可持续优化。
+这是一个基于现代化技术栈开发的企业级通用后台管理系统。系统采纳前后端分离架构，专注于高可维护性、最佳实践与优美的界面交互。本系统内置了完善的角色权限控制 (RBAC)、动态路由菜单、精美的数据可视化概览面板以及完整的管理员与系统日志管理模块。
 
-## 1. 项目定位
+## 🛠️ 技术栈 (Tech Stack)
 
-- 面向中后台场景的通用管理底座（用户、角色、菜单、组织、日志）
-- 强调安全性（鉴权、验证码、登录防暴力破解、统一错误处理）
-- 强调稳定性（中间件治理、连接池配置、构建与自检闭环）
-- 强调体验一致（统一表单反馈、浅色动态登录/注册页、组件复用）
+### 前端生态 (Frontend)
+- **核心框架**: Vue 3 (Composition API) 
+- **构建工具**: Vite 7
+- **类型系统**: TypeScript
+- **状态管理**: Pinia
+- **路由控制**: Vue Router 4 (支持动态路由与权限拦截)
+- **UI 样式**: Tailwind CSS v4, DaisyUI, 现代玻璃拟物态(Glassmorphism)设计
+- **第三方组件**:
+  - `axios` 统一网络请求封装与拦截
+  - `ApexCharts` 动态数据可视化图表
+  - `lucide-vue-next` 与 `heroicons` 提供海量精美矢量图
 
-## 2. 核心能力
+### 后端生态 (Backend)
+- **核心框架**: Golang (1.20+)
+- **Web 框架**: Gin (高性能路由分发)
+- **ORM 映射**: GORM (兼容 MySQL)
+- **认证授权**: JWT (JSON Web Token)
+- **实时热更**: Air (开发环境自动化平滑重载)
+- **数据库**: MySQL 8.x + Redis (可选，用于缓存)
 
-### 2.1 业务能力
+---
 
-- 认证模块：登录、注册、退出、验证码
-- 账号体系：管理员管理、个人资料、密码修改、头像上传
-- 权限体系：角色管理、菜单管理、权限分配
-- 组织体系：部门管理、岗位管理
-- 审计体系：登录日志、操作日志
+## 🌟 核心特性 (Features)
 
-### 2.2 安全能力
+1. **动态菜单与权限 (RBAC)**
+   - 细粒度的路由守卫拦截
+   - 根据用户角色和后端配置动态渲染侧边栏菜单
+   - 指令级 (`v-permission`, `v-role`) 前端按钮权限控制
+2. **极佳的视觉与动效体验**
+   - 适配深色模式 (Dark Mode) 与亮色模式无缝切换
+   - Tailwind 提供的响应式系统，完美适配桌面与移动端设备
+3. **完备的基础运维功能**
+   - 多级管理员账号与组织架构支持
+   - 用户登入、登出行为跟踪及系统操作日志记录
+4. **性能极致优化**
+   - 后端针对关键登录和资源获取接口做了并发查询优化 (`goroutines`)
+   - 彻底修复 GORM 模型校验问题与 JWT 失效逻辑
 
-- JWT 鉴权与路由保护
-- 验证码校验（已修复为一次性消费，防止重复复用）
-- 登录失败防暴力破解：
-  - 连续失败达到阈值自动锁定
-  - 锁定时间到期自动恢复
-  - 阈值与时长可配置（`security.loginFailedAttemptLimit` / `security.loginLockMinutes`）
-- 统一错误模型与 TraceID 支撑
+---
 
-### 2.3 稳定性与工程能力
+## 🚀 快速启动 (Getting Started)
 
-- 后端自检：`go test ./...` + `go build ./...` + `go vet ./...`
-- 前端自检：`npm run build-only`
-- 一键全链路自检脚本：`server/tools/self_check.sh`
-- 前端分包策略（manualChunks）降低主包体积与首屏压力
-
-## 3. 技术栈
-
-### 后端（server）
-
-- Go 1.21+
-- Gin
-- GORM + MySQL
-- Redis
-- JWT
-- Swagger
-
-### 前端（web）
-
-- Vue 3 + TypeScript
-- Vite
-- Pinia
-- Vue Router
-- TailwindCSS + DaisyUI
-- Axios
-
-## 4. 项目结构
-
-```text
-general_go_vue_admin/
-├── docs/                       # 项目文档
-│   ├── EVOLUTION_MATRIX.md     # 演进矩阵（对标能力清单）
-│   ├── backend/
-│   └── frontend/
-├── server/                     # Go 后端
-│   ├── api/
-│   │   ├── controller/
-│   │   ├── service/
-│   │   ├── dao/
-│   │   └── entity/
-│   ├── common/
-│   ├── middleware/
-│   ├── pkg/
-│   ├── router/
-│   ├── test/
-│   ├── tools/
-│   │   └── self_check.sh       # 一键自检
-│   ├── config.yaml
-│   └── main.go
-└── web/                        # Vue 前端
-    ├── src/
-    │   ├── api/
-    │   ├── views/
-    │   ├── components/
-    │   ├── router/
-    │   ├── store/
-    │   └── utils/
-    ├── vite.config.ts
-    └── package.json
-```
-
-## 5. 快速启动
-
-## 5.1 环境准备
-
-- Go 1.21+
-- Node.js 18+
-- MySQL 8+
-- Redis 6+
-
-## 5.2 启动依赖（示例）
-
-```bash
-# Redis
-docker run -d --name redis -p 6379:6379 redis:7-alpine
-
-# MySQL
-docker run -d --name mysql \
-  -p 3306:3306 \
-  -e MYSQL_ROOT_PASSWORD=admin1234 \
-  mysql:8.0
-```
-
-## 5.3 启动后端
+### 1. 后端服务 (Go Server)
+确保本地已安装 Go 环境以及相关数据库，然后修改 `server/config.yaml` 填入您的 MySQL 账号密码。
 
 ```bash
 cd server
+# 下载相关包
 go mod tidy
+
+# （推荐）使用 air 进行热重载开发
+go install github.com/air-verse/air@latest
+air
+
+# 普通运行
 go run main.go
 ```
+*后端访问接口默认跑在 `http://127.0.0.1:8368`。*
 
-默认地址：`http://127.0.0.1:8080`
-
-## 5.4 启动前端
+### 2. 前端服务 (Vue Web)
+确保本地已安装 Node.js(推荐 v20+) 与 Vite。
 
 ```bash
 cd web
-npm install
-npm run dev
+# 安装依赖
+npm install  # 或 yarn install
+
+# 启动冷更服务
+npm run dev  # 或 yarn dev
 ```
+*前端默认跑在 `http://localhost:3000`，内置 proxy 配置会自动将 `/api` 请求代理至后端。*
 
-默认地址：`http://localhost:3000`
+---
 
-## 6. 初始化数据与默认账号
+## 🛡️ 近期优化与 Bug Fixes (Changelog)
 
-项目支持首启种子数据（见 `server/config.yaml` 的 `seed` 配置）。  
-默认会初始化管理员账号（可在配置中修改）：
+- **[修复]** 修复了 Vue Router 4 内部由相同 `name: 'Profile'` 导致的配置层隐式冲突覆盖，解决了点击个人资料菜单后白屏并提示 "No match found" 的致命 Bug。
+- **[修复]** 重构后端 `server/pkg/jwt/jwt.go` 全局变量初始化陷阱，确保下发的 Token 根据最新 Config 热载入实时计算到期时间，根除“前端收到 Token 却立刻被识别伪过期”从而陷入认证死循环无法跳转 dashboard 的疑难杂症。
+- **[修复]** 修正了 GORM 在扫描包含 slice 非映射字段 `LeftMenuVo.MenuSvoList` 时的结构体解析 panic。
+- **[优化]** 清理了 `AuthUserMenu` 中未挂载的空连结（如 `/help`）。
 
-- username: `admin`
-- password: `admin123`
+---
 
-> 如果数据库中已存在管理员数据，则不会重复初始化。
-
-## 7. 关键配置说明（server/config.yaml）
-
-## 7.1 服务与数据库
-
-- `server.port` / `server.host` / `server.model`
-- `db.*`（连接、连接池、慢查询阈值等）
-- `redis.*`
-
-## 7.2 登录安全策略
-
-```yaml
-security:
-  loginFailedAttemptLimit: 5
-  loginLockMinutes: 15
-```
-
-说明：
-
-- 连续失败达到 `loginFailedAttemptLimit` 时触发锁定
-- 锁定时长为 `loginLockMinutes`
-
-## 7.3 种子数据
-
-```yaml
-seed:
-  enable: true
-  admin:
-    username: admin
-    password: admin123
-    nickname: 系统管理员
-    email: admin@example.com
-    phone: 13800138000
-```
-
-## 8. API 与调试入口
-
-- Swagger：`/swagger/index.html`
-- 验证码：`GET /api/captcha`
-- 登录：`POST /api/login`
-- 注册：`POST /api/register`
-
-## 9. 质量保障与自检
-
-## 9.1 一键自检（推荐）
-
-```bash
-server/tools/self_check.sh
-```
-
-执行内容：
-
-1. `go test ./...`
-2. `go build ./...`
-3. `npm run build-only`
-
-## 9.2 手动检查（可选）
-
-```bash
-cd server && go vet ./...
-```
-
-## 10. 已完成优化（近期）
-
-- 修复配置文件路径依赖启动目录的问题，增强测试/部署稳定性
-- 修复若干结构体 tag 与不可达代码问题（`go vet` 清零）
-- 修复验证码可复用漏洞（改为一次性消费）
-- 增强登录安全：失败次数限制 + 临时锁定 + 可配置策略
-- 个人中心链路打通：资料映射、改密参数、头像上传闭环
-- 上传接口异常分支补全，避免失败后继续执行
-- 前端构建分包优化，降低主包体积
-
-## 11. 演进路线
-
-详见：[docs/EVOLUTION_MATRIX.md](./docs/EVOLUTION_MATRIX.md)
-
-高优先级方向：
-
-- 字典管理
-- 系统参数中心
-- 定时任务中心
-- 数据权限（按组织维度）
-- 审计增强（变更前后 diff / 风险分级）
-
-## 12. 开发约定
-
-- 新增功能默认补充错误处理和边界验证
-- 新增后端功能至少通过 `go test` + `go build` + `go vet`
-- 前端提交前至少通过 `npm run build-only`
-- 重要改动建议同步更新 `docs/` 文档
-
-## 13. License
-
-MIT
+## 📝 开源协议
+MIT License.

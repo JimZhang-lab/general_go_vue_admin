@@ -12,8 +12,8 @@ package entity
 
 // SysRoleMenu 角色与菜单关系模型
 type SysRoleMenu struct {
-	RoleId uint `gorm:"column:role_id;comment:'角色id';NOT NULL" json:"roleId"` // 角色id
-	MenuId uint `gorm:"column:menu_id;comment:'菜单id';NOT NULL" json:"menuId"` // 菜单id
+	RoleId uint `gorm:"column:role_id;comment:'角色id';not null;uniqueIndex:idx_role_menu_relation" json:"roleId"` // 角色id
+	MenuId uint `gorm:"column:menu_id;comment:'菜单id';not null;uniqueIndex:idx_role_menu_relation" json:"menuId"` // 菜单id
 }
 
 func (SysRoleMenu) TableName() string {

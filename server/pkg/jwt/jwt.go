@@ -41,11 +41,16 @@ func GenerateTokenByAdmin(admin entity.SysAdmin) (string, error) {
 		Phone:    admin.Phone,
 		Note:     admin.Note,
 	}
+	expireDuration := time.Duration(config.Config.Jwt.Expire) * time.Minute
+	if expireDuration == 0 {
+		expireDuration = 120 * time.Minute
+	}
+
 	c := userStdClaims{
 		jwtAdmin, // 自定义字段
 		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenExpireDuration)), // 过期时间
-			Issuer:    "admin",                                                 // 签发人
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(expireDuration)), // 过期时间
+			Issuer:    "admin",                                            // 签发人
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)

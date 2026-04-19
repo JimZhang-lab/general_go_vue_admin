@@ -145,6 +145,35 @@ interface ChangePasswordData {
   resetPassword: string;
 }
 
+interface SettingItem {
+  id?: number;
+  groupKey: string;
+  settingKey: string;
+  settingName: string;
+  settingValue: string;
+  valueType?: string;
+  optionsJson?: string;
+  isEncrypted?: boolean;
+  sort?: number;
+  remark?: string;
+}
+
+interface NoticeParams extends PageParams {
+  title?: string;
+  noticeType?: string;
+  status?: string | number;
+}
+
+interface NoticeData {
+  id?: number;
+  title: string;
+  content: string;
+  noticeType: string;
+  noticeLevel: string;
+  status: number;
+  targetType: string;
+}
+
 interface LoginResponse {
   code: number;
   message: string;
@@ -158,8 +187,17 @@ interface LoginResponse {
 
 // 定义日志相关接口
 interface LogParams extends PageParams {
+  username?: string;
+  beginTime?: string;
+  endTime?: string;
+}
+
+interface LoginLogParams extends PageParams {
+  username?: string;
+  loginStatus?: string | number;
   title?: string;
-  operName?: string;
+  beginTime?: string;
+  endTime?: string;
 }
 
 class AdminApi{
@@ -497,7 +535,7 @@ class AdminApi{
     }
 
     // 获取操作日志
-    getOperationLogs(params: any): Promise<{ data: ApiResponse }> {
+    getOperationLogs(params: LogParams): Promise<{ data: ApiResponse }> {
       return request({
         url: '/sysOperationLog/list',
         method: 'get',
@@ -505,12 +543,162 @@ class AdminApi{
       })
     }
 
+    // 删除单条操作日志
+    deleteOperationLog(id: number): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/sysOperationLog/delete',
+        method: 'delete',
+        data: { id }
+      })
+    }
+
+    // 批量删除操作日志
+    batchDeleteOperationLogs(ids: number[]): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/sysOperationLog/batch/delete',
+        method: 'delete',
+        data: { ids }
+      })
+    }
+
+    // 清空操作日志
+    cleanOperationLogs(): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/sysOperationLog/clean',
+        method: 'delete'
+      })
+    }
+
     // 获取登录日志
-    getLoginLogs(params: any): Promise<{ data: ApiResponse }> {
+    getLoginLogs(params: LoginLogParams): Promise<{ data: ApiResponse }> {
       return request({
         url: '/sysLoginInfo/list',
         method: 'get',
         params
+      })
+    }
+
+    // 删除单条登录日志
+    deleteLoginLog(id: number): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/sysLoginInfo/delete',
+        method: 'delete',
+        data: { id }
+      })
+    }
+
+    // 批量删除登录日志
+    batchDeleteLoginLogs(ids: number[]): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/sysLoginInfo/batch/delete',
+        method: 'delete',
+        data: { ids }
+      })
+    }
+
+    // 清空登录日志
+    cleanLoginLogs(): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/sysLoginInfo/clean',
+        method: 'delete'
+      })
+    }
+
+    // 获取系统设置
+    getSettingList(groupKey: string): Promise<{ data: ApiResponse<SettingItem[]> }> {
+      return request({
+        url: '/setting/list',
+        method: 'get',
+        params: { groupKey }
+      })
+    }
+
+    // 批量更新系统设置
+    batchUpdateSettings(items: SettingItem[]): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/setting/batch/update',
+        method: 'put',
+        data: { items }
+      })
+    }
+
+    // 获取通知列表
+    getNoticeList(params: NoticeParams): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/notice/list',
+        method: 'get',
+        params
+      })
+    }
+
+    // 获取当前用户通知
+    getCurrentNotices(params: { limit?: number; unreadOnly?: boolean }): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/notice/current',
+        method: 'get',
+        params
+      })
+    }
+
+    // 新增通知
+    addNotice(data: NoticeData): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/notice/add',
+        method: 'post',
+        data
+      })
+    }
+
+    // 更新通知
+    updateNotice(data: NoticeData): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/notice/update',
+        method: 'put',
+        data
+      })
+    }
+
+    // 更新通知状态
+    updateNoticeStatus(data: { id: number; status: number }): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/notice/updateStatus',
+        method: 'put',
+        data
+      })
+    }
+
+    // 删除通知
+    deleteNotice(id: number): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/notice/delete',
+        method: 'delete',
+        data: { id }
+      })
+    }
+
+    // 批量删除通知
+    batchDeleteNotices(ids: number[]): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/notice/batch/delete',
+        method: 'delete',
+        data: { ids }
+      })
+    }
+
+    // 标记通知已读
+    markNoticeRead(id: number): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/notice/read',
+        method: 'put',
+        data: { id }
+      })
+    }
+
+    // 全部标记已读
+    markAllNoticeRead(): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/notice/readAll',
+        method: 'put'
       })
     }
 

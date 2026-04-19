@@ -51,7 +51,7 @@
     <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
       <nav class="mb-6">
         <div class="flex flex-col" style="gap: 1rem;">
-          <div v-for="(menuGroup, groupIndex) in authMenuGroups" :key="groupIndex">
+          <div v-for="(menuGroup, groupIndex) in filteredAuthMenuGroups" :key="groupIndex">
             <h2
               :class="[
                 'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
@@ -183,6 +183,7 @@
 import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useSidebar } from "@/composables/useSidebar";
+import { AuthUtils } from "@/utils/auth";
 import {
   ChevronDownIcon,
   HorizontalDots,
@@ -209,26 +210,31 @@ const authMenuGroups = [
         icon: BarChartIcon,
         name: "权限总览",
         path: "/auth/dashboard",
+        permissions: ["system:auth:view"],
       },
       {
         icon: UserGroupIcon,
         name: "管理员管理",
         path: "/auth/admin",
+        permissions: ["system:admin:list"],
       },
       {
         icon: SettingsIcon,
         name: "角色管理",
         path: "/auth/role",
+        permissions: ["system:role:list"],
       },
       {
         icon: PlugInIcon,
         name: "权限管理",
         path: "/auth/permission",
+        permissions: ["system:menu:list"],
       },
       {
         icon: DocsIcon,
         name: "系统日志",
         path: "/auth/logs",
+        permissions: ["system:log:list"],
       },
     ],
   },
@@ -241,12 +247,19 @@ const authMenuGroups = [
         path: "/auth/profile",
       },
       {
+        icon: DocsIcon,
+        name: "通知中心",
+        path: "/auth/notifications",
+        permissions: ["system:notice:list"],
+      },
+      {
         icon: CogIcon,
         name: "系统设置",
+        permissions: ["system:setting:list"],
         subItems: [
-          { name: "基础设置", path: "/auth/settings/basic" },
-          { name: "安全设置", path: "/auth/settings/security" },
-          { name: "通知设置", path: "/auth/settings/notification" },
+          { name: "基础设置", path: "/auth/settings/basic", permissions: ["system:setting:list"] },
+          { name: "安全设置", path: "/auth/settings/security", permissions: ["system:setting:list"] },
+          { name: "通知设置", path: "/auth/settings/notification", permissions: ["system:setting:list"] },
         ],
       },
     ],
@@ -263,6 +276,41 @@ const authMenuGroups = [
   },
 ];
 
+const filteredAuthMenuGroups = computed(() => {
+  return authMenuGroups
+    .map((group) => {
+      const items = group.items
+        .map((item) => {
+          const filteredSubItems = item.subItems?.filter((subItem) =>
+            AuthUtils.hasAnyPermission(subItem.permissions)
+          )
+
+          if (!AuthUtils.hasAnyPermission(item.permissions)) {
+            return null
+          }
+
+          if (item.subItems) {
+            if (!filteredSubItems || filteredSubItems.length === 0) {
+              return null
+            }
+            return {
+              ...item,
+              subItems: filteredSubItems,
+            }
+          }
+
+          return item
+        })
+        .filter(Boolean)
+
+      return {
+        ...group,
+        items,
+      }
+    })
+    .filter((group) => group.items.length > 0)
+})
+
 const isActive = (path) => route.path === path;
 
 const toggleSubmenu = (groupIndex, itemIndex) => {
@@ -271,7 +319,7 @@ const toggleSubmenu = (groupIndex, itemIndex) => {
 };
 
 const isAnySubmenuRouteActive = computed(() => {
-  return authMenuGroups.some((group) =>
+  return filteredAuthMenuGroups.value.some((group) =>
     group.items.some(
       (item) =>
         item.subItems && item.subItems.some((subItem) => isActive(subItem.path))
@@ -284,7 +332,7 @@ const isSubmenuOpen = (groupIndex, itemIndex) => {
   return (
     openSubmenu.value === key ||
     (isAnySubmenuRouteActive.value &&
-      authMenuGroups[groupIndex].items[itemIndex].subItems?.some((subItem) =>
+      filteredAuthMenuGroups.value[groupIndex].items[itemIndex].subItems?.some((subItem) =>
         isActive(subItem.path)
       ))
   );

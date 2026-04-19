@@ -72,7 +72,7 @@
           </div>
 
           <!-- 操作按钮 -->
-          <div class="flex" style="gap: 0.5rem;">
+          <div class="flex flex-wrap" style="gap: 0.5rem;">
             <AuthButton
               @click="searchLogs"
               variant="primary"
@@ -89,7 +89,23 @@
               @click="exportLogs"
               variant="success"
               size="md"
+              :loading="isExporting"
               text="导出"
+            />
+            <AuthButton
+              @click="batchDeleteLogs"
+              variant="danger"
+              size="md"
+              :disabled="currentSelectedIds.length === 0"
+              :loading="isDeleting"
+              :text="`批量删除(${currentSelectedIds.length})`"
+            />
+            <AuthButton
+              @click="cleanCurrentLogs"
+              variant="warning"
+              size="md"
+              :loading="isClearing"
+              text="清空当前日志"
             />
           </div>
         </div>
@@ -101,6 +117,14 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <input
+                    type="checkbox"
+                    :checked="operationLogs.length > 0 && selectedOperationIds.length === operationLogs.length"
+                    @change="toggleAllOperationSelection"
+                    class="h-4 w-4 rounded border border-gray-300 bg-white text-brand-600"
+                  />
+                </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户名</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">请求方法</th>
@@ -112,6 +136,14 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="log in operationLogs" :key="log.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <input
+                    type="checkbox"
+                    :checked="selectedOperationIds.includes(log.id)"
+                    @change="toggleOperationSelection(log.id, $event)"
+                    class="h-4 w-4 rounded border border-gray-300 bg-white text-brand-600"
+                  />
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ log.id }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ log.username }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -132,6 +164,12 @@
                   >
                     详情
                   </button>
+                  <button
+                    @click="deleteSingleLog(log.id)"
+                    class="ml-3 text-red-600 hover:text-red-900"
+                  >
+                    删除
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -145,6 +183,14 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <input
+                  type="checkbox"
+                  :checked="loginLogs.length > 0 && selectedLoginIds.length === loginLogs.length"
+                  @change="toggleAllLoginSelection"
+                  class="h-4 w-4 rounded border border-gray-300 bg-white text-brand-600"
+                />
+              </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户名</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP地址</th>
@@ -154,10 +200,19 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">提示消息</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">登录时间</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="log in loginLogs" :key="log.id" class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <input
+                  type="checkbox"
+                  :checked="selectedLoginIds.includes(log.id)"
+                  @change="toggleLoginSelection(log.id, $event)"
+                  class="h-4 w-4 rounded border border-gray-300 bg-white text-brand-600"
+                />
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ log.id }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ log.username }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ log.ipAddress }}</td>
@@ -174,6 +229,14 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 max-w-xs truncate">{{ log.message }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ formatDate(log.loginTime) }}</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button
+                  @click="deleteSingleLog(log.id)"
+                  class="text-red-600 hover:text-red-900"
+                >
+                  删除
+                </button>
+              </td>
             </tr>
           </tbody>
           </table>
@@ -343,6 +406,11 @@ const loginLogs = ref<LoginLog[]>([])
 const loading = ref(false)
 const showDetailModal = ref(false)
 const currentLog = ref<OperationLog | null>(null)
+const isDeleting = ref(false)
+const isClearing = ref(false)
+const isExporting = ref(false)
+const selectedOperationIds = ref<number[]>([])
+const selectedLoginIds = ref<number[]>([])
 
 // 搜索表单
 const searchForm = reactive({
@@ -359,6 +427,14 @@ const pagination = reactive({
   total: 0,
   pages: 0
 })
+
+const currentSelectedIds = computed(() =>
+  activeTab.value === 'operation' ? selectedOperationIds.value : selectedLoginIds.value
+)
+
+const currentLogs = computed<Array<OperationLog | LoginLog>>(() =>
+  activeTab.value === 'operation' ? operationLogs.value : loginLogs.value
+)
 
 // 计算属性 - 可见页码
 const visiblePages = computed(() => {
@@ -449,6 +525,7 @@ const getOperationLogs = async () => {
       operationLogs.value = list
       pagination.total = (res.data?.total ?? list.length)
       pagination.pages = Math.ceil(pagination.total / pagination.pageSize)
+      selectedOperationIds.value = []
     } else {
       ToastAlert.error({
         title: '获取操作日志失败',
@@ -457,33 +534,14 @@ const getOperationLogs = async () => {
     }
   } catch (error) {
     console.error('获取操作日志失败:', error)
-    // 模拟一些操作日志数据
-    operationLogs.value = [
-      {
-        id: 1,
-        title: '用户登录',
-        username: 'admin',
-        method: 'POST',
-        url: '/api/login',
-        ip: '192.168.1.100',
-        createTime: new Date().toISOString(),
-        operParam: '{"username":"admin","password":"******"}',
-        jsonResult: '{"code":200,"message":"登录成功"}'
-      },
-      {
-        id: 2,
-        title: '添加用户',
-        username: 'admin',
-        method: 'POST',
-        url: '/api/admin/add',
-        ip: '192.168.1.100',
-        createTime: new Date(Date.now() - 3600000).toISOString(),
-        operParam: '{"username":"test","phone":"13800138000"}',
-        jsonResult: '{"code":200,"message":"添加成功"}'
-      }
-    ]
-    pagination.total = 2
-    pagination.pages = 1
+    operationLogs.value = []
+    selectedOperationIds.value = []
+    pagination.total = 0
+    pagination.pages = 0
+    ToastAlert.error({
+      title: '获取操作日志失败',
+      message: '网络异常，请重试'
+    })
   } finally {
     loading.value = false
   }
@@ -509,6 +567,7 @@ const getLoginLogs = async () => {
       loginLogs.value = list
       pagination.total = (res.data?.total ?? list.length)
       pagination.pages = Math.ceil(pagination.total / pagination.pageSize)
+      selectedLoginIds.value = []
     } else {
       ToastAlert.error({
         title: '获取登录日志失败',
@@ -517,33 +576,14 @@ const getLoginLogs = async () => {
     }
   } catch (error) {
     console.error('获取登录日志失败:', error)
-    // 模拟一些登录日志数据
-    loginLogs.value = [
-      {
-        id: 1,
-        username: 'admin',
-        ipAddress: '192.168.1.100',
-        loginLocation: '北京市',
-        browser: 'Chrome 120.0',
-        os: 'Windows 10',
-        loginStatus: 1,
-        message: '登录成功',
-        loginTime: new Date().toISOString()
-      },
-      {
-        id: 2,
-        username: 'test',
-        ipAddress: '192.168.1.101',
-        loginLocation: '上海市',
-        browser: 'Firefox 119.0',
-        os: 'macOS 14.0',
-        loginStatus: 2,
-        message: '密码错误',
-        loginTime: new Date(Date.now() - 1800000).toISOString()
-      }
-    ]
-    pagination.total = 2
-    pagination.pages = 1
+    loginLogs.value = []
+    selectedLoginIds.value = []
+    pagination.total = 0
+    pagination.pages = 0
+    ToastAlert.error({
+      title: '获取登录日志失败',
+      message: '网络异常，请重试'
+    })
   } finally {
     loading.value = false
   }
@@ -575,33 +615,232 @@ const resetSearch = () => {
   }
 }
 
+const toggleAllOperationSelection = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  selectedOperationIds.value = target.checked ? operationLogs.value.map((item) => item.id) : []
+}
+
+const toggleOperationSelection = (id: number, event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.checked) {
+    if (!selectedOperationIds.value.includes(id)) {
+      selectedOperationIds.value.push(id)
+    }
+    return
+  }
+  selectedOperationIds.value = selectedOperationIds.value.filter((item) => item !== id)
+}
+
+const toggleAllLoginSelection = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  selectedLoginIds.value = target.checked ? loginLogs.value.map((item) => item.id) : []
+}
+
+const toggleLoginSelection = (id: number, event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.checked) {
+    if (!selectedLoginIds.value.includes(id)) {
+      selectedLoginIds.value.push(id)
+    }
+    return
+  }
+  selectedLoginIds.value = selectedLoginIds.value.filter((item) => item !== id)
+}
+
+const refreshCurrentLogs = () => {
+  if (activeTab.value === 'operation') {
+    return getOperationLogs()
+  }
+  return getLoginLogs()
+}
+
+const triggerDownload = (filename: string, content: string) => {
+  const blob = new Blob([`\uFEFF${content}`], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+const toCsvCell = (value: unknown) => {
+  const text = String(value ?? '').replace(/"/g, '""')
+  return `"${text}"`
+}
+
 // 导出日志
 const exportLogs = async () => {
   try {
-    ToastAlert.info({
-      title: '导出中',
-      message: '正在准备导出文件...'
-    })
-
-    // 这里应该调用导出API
-    // const { data } = await adminApi.exportLogs({
-    //   type: activeTab.value,
-    //   ...searchForm
-    // })
-
-    // 模拟导出
-    setTimeout(() => {
-      ToastAlert.success({
-        title: '导出成功',
-        message: '文件已下载到本地'
+    isExporting.value = true
+    const rows = currentLogs.value
+    if (!rows.length) {
+      ToastAlert.warning({
+        title: '暂无数据',
+        message: '当前没有可导出的日志数据'
       })
-    }, 2000)
+      return
+    }
+
+    let csv = ''
+    if (activeTab.value === 'operation') {
+      const headers = ['ID', '用户名', '请求方法', '请求URL', 'IP地址', '操作时间']
+      const body = (rows as OperationLog[]).map((row) =>
+        [row.id, row.username, row.method, row.url, row.ip, formatDate(row.createTime)].map(toCsvCell).join(',')
+      )
+      csv = [headers.map(toCsvCell).join(','), ...body].join('\n')
+    } else {
+      const headers = ['ID', '用户名', 'IP地址', '登录地点', '浏览器', '操作系统', '状态', '提示消息', '登录时间']
+      const body = (rows as LoginLog[]).map((row) =>
+        [
+          row.id,
+          row.username,
+          row.ipAddress,
+          row.loginLocation,
+          row.browser,
+          row.os,
+          row.loginStatus === 1 ? '成功' : '失败',
+          row.message,
+          formatDate(row.loginTime)
+        ].map(toCsvCell).join(',')
+      )
+      csv = [headers.map(toCsvCell).join(','), ...body].join('\n')
+    }
+
+    const dateTag = new Date().toISOString().slice(0, 10)
+    const filename = activeTab.value === 'operation' ? `operation_logs_${dateTag}.csv` : `login_logs_${dateTag}.csv`
+    triggerDownload(filename, csv)
+    ToastAlert.success({
+      title: '导出成功',
+      message: '日志文件已下载'
+    })
   } catch (error) {
     console.error('导出日志失败:', error)
     ToastAlert.error({
       title: '导出失败',
       message: '网络异常，请重试'
     })
+  } finally {
+    isExporting.value = false
+  }
+}
+
+const deleteSingleLog = async (id: number) => {
+  if (!confirm('确认删除该条日志记录吗？')) {
+    return
+  }
+
+  try {
+    isDeleting.value = true
+    const response =
+      activeTab.value === 'operation'
+        ? await adminApi.deleteOperationLog(id)
+        : await adminApi.deleteLoginLog(id)
+
+    const res = response.data
+    if (res.code === 200) {
+      ToastAlert.success({
+        title: '删除成功',
+        message: '日志已删除'
+      })
+      await refreshCurrentLogs()
+      return
+    }
+
+    ToastAlert.error({
+      title: '删除失败',
+      message: res.message || '删除失败，请稍后重试'
+    })
+  } catch (error) {
+    console.error('删除日志失败:', error)
+    ToastAlert.error({
+      title: '删除失败',
+      message: '网络异常，请重试'
+    })
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+const batchDeleteLogs = async () => {
+  const ids = [...currentSelectedIds.value]
+  if (!ids.length) {
+    ToastAlert.warning({
+      title: '未选择数据',
+      message: '请先勾选需要删除的日志'
+    })
+    return
+  }
+
+  if (!confirm(`确认删除选中的 ${ids.length} 条日志吗？`)) {
+    return
+  }
+
+  try {
+    isDeleting.value = true
+    const response =
+      activeTab.value === 'operation'
+        ? await adminApi.batchDeleteOperationLogs(ids)
+        : await adminApi.batchDeleteLoginLogs(ids)
+
+    const res = response.data
+    if (res.code === 200) {
+      ToastAlert.success({
+        title: '删除成功',
+        message: `已删除 ${ids.length} 条日志`
+      })
+      await refreshCurrentLogs()
+      return
+    }
+
+    ToastAlert.error({
+      title: '删除失败',
+      message: res.message || '删除失败，请稍后重试'
+    })
+  } catch (error) {
+    console.error('批量删除日志失败:', error)
+    ToastAlert.error({
+      title: '删除失败',
+      message: '网络异常，请重试'
+    })
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+const cleanCurrentLogs = async () => {
+  if (!confirm('确认清空当前日志类型的全部记录吗？该操作不可恢复。')) {
+    return
+  }
+
+  try {
+    isClearing.value = true
+    const response =
+      activeTab.value === 'operation' ? await adminApi.cleanOperationLogs() : await adminApi.cleanLoginLogs()
+    const res = response.data
+    if (res.code === 200) {
+      ToastAlert.success({
+        title: '清空成功',
+        message: '日志已清空'
+      })
+      await refreshCurrentLogs()
+      return
+    }
+
+    ToastAlert.error({
+      title: '清空失败',
+      message: res.message || '清空失败，请稍后重试'
+    })
+  } catch (error) {
+    console.error('清空日志失败:', error)
+    ToastAlert.error({
+      title: '清空失败',
+      message: '网络异常，请重试'
+    })
+  } finally {
+    isClearing.value = false
   }
 }
 
@@ -648,6 +887,8 @@ const goToPage = (page: number | string) => {
 // 监听标签页切换
 watch(activeTab, (newTab) => {
   pagination.page = 1
+  selectedOperationIds.value = []
+  selectedLoginIds.value = []
   if (newTab === 'operation') {
     getOperationLogs()
   } else {

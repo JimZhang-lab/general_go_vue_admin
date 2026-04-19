@@ -11,6 +11,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os/signal"
 	"server/common/config"
@@ -70,9 +71,13 @@ func main() {
 
 func init() {
 	// 初始化数据库
-	db.SetupDBLink()
+	if err := db.SetupDBLink(); err != nil {
+		panic(fmt.Errorf("数据库初始化失败: %w", err))
+	}
 	// 初始化redis
-	redis.SetupRedisDb()
+	if err := redis.SetupRedisDb(); err != nil {
+		panic(fmt.Errorf("Redis初始化失败: %w", err))
+	}
 	// 初始化API状态码
 	result.Init()
 }

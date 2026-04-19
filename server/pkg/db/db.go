@@ -14,6 +14,7 @@ import (
 	"server/api/entity"
 	"server/common/config"
 	"server/pkg/seed"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -23,7 +24,6 @@ import (
 var Db *gorm.DB
 
 func SetupDBLink() error {
-
 	var err error
 	var dbConfig = config.Config.DB
 	url := fmt.Sprintf(
@@ -35,15 +35,21 @@ func SetupDBLink() error {
 		dbConfig.DBName,
 		dbConfig.Charset)
 
+	gormLogLevel := logger.LogLevel(dbConfig.LogLevel)
+	if gormLogLevel < logger.Silent || gormLogLevel > logger.Info {
+		gormLogLevel = logger.Info
+	}
+
 	Db, err = gorm.Open(mysql.Open(url), &gorm.Config{
-		Logger:                                   logger.Default.LogMode(logger.Info),
+		Logger:                                   logger.Default.LogMode(gormLogLevel),
 		DisableForeignKeyConstraintWhenMigrating: true,
+		PrepareStmt:                              dbConfig.PrepareStmt,
 	})
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("连接数据库失败: %w", err)
 	}
 	if Db.Error != nil {
-		panic(Db.Error)
+		return fmt.Errorf("数据库实例初始化失败: %w", Db.Error)
 	}
 
 	// 自动建表
@@ -57,6 +63,9 @@ func SetupDBLink() error {
 		&entity.SysMenu{},
 		&entity.SysLoginInfo{},
 		&entity.SysOperationLog{},
+		&entity.SysSetting{},
+		&entity.SysNotice{},
+		&entity.SysNoticeRead{},
 	)
 	if err != nil {
 		return err
@@ -74,5 +83,11 @@ func SetupDBLink() error {
 	}
 	sqlDB.SetMaxIdleConns(dbConfig.MaxIdleConns)
 	sqlDB.SetMaxOpenConns(dbConfig.MaxOpenConns)
+	if dbConfig.SetConnMaxLifetime > 0 {
+		sqlDB.SetConnMaxLifetime(time.Duration(dbConfig.SetConnMaxLifetime) * time.Second)
+	}
+	if dbConfig.ConnMaxIdleTime > 0 {
+		sqlDB.SetConnMaxIdleTime(time.Duration(dbConfig.ConnMaxIdleTime) * time.Second)
+	}
 	return nil
 }
