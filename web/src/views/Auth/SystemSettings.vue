@@ -4,8 +4,8 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/views/Auth/SystemSettings.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
   <AuthLayout>
@@ -22,7 +22,7 @@
               'inline-flex items-center rounded-xl border px-4 py-2 text-sm font-medium transition-colors',
               route.params.group === item.key
                 ? 'border-brand-500 bg-brand-50 text-brand-700 dark:border-brand-400 dark:bg-brand-500/15 dark:text-brand-200'
-                : 'border-gray-200 text-gray-600 hover:border-brand-300 hover:text-brand-600 dark:border-gray-700 dark:text-gray-300 dark:hover:border-brand-500'
+                : 'border-gray-200 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-brand-500'
             ]"
           >
             {{ item.label }}
@@ -30,158 +30,116 @@
         </div>
       </AuthCard>
 
-      <AuthCard title="配置项">
-        <div v-if="loading" class="grid gap-4 md:grid-cols-2">
-          <div
-            v-for="index in 4"
-            :key="index"
-            class="h-36 animate-pulse rounded-2xl border border-gray-200 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/40"
-          ></div>
-        </div>
+      <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 shadow-sm relative overflow-hidden">
 
-        <div v-else-if="settings.length === 0" class="rounded-2xl border border-dashed border-gray-300 px-6 py-10 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
-          当前分组暂无可配置项。
-        </div>
-
-        <div v-else class="grid gap-4 md:grid-cols-2">
-          <div
-            v-for="item in settings"
-            :key="item.settingKey"
-            class="rounded-2xl border border-gray-200 p-5 dark:border-gray-800"
-          >
-            <div class="flex items-start justify-between gap-4">
-              <div>
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white/90">{{ item.settingName }}</h3>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ item.settingKey }}</p>
-              </div>
-              <span class="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
-                {{ valueTypeLabel(item.valueType) }}
-              </span>
-            </div>
-
-            <p v-if="item.remark" class="mt-3 text-sm text-gray-600 dark:text-gray-400">
-              {{ item.remark }}
-            </p>
-
-            <div class="mt-4">
-              <label v-if="item.valueType === 'switch'" class="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 dark:border-gray-700">
-                <span class="text-sm text-gray-700 dark:text-gray-300">启用该配置</span>
-                <input
-                  v-model="item.boolValue"
-                  type="checkbox"
-                  class="h-5 w-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                />
-              </label>
-
-              <input
-                v-else-if="item.valueType === 'number'"
-                v-model="item.settingValue"
-                type="number"
-                class="h-11 w-full rounded-xl border border-gray-300 bg-white px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-              />
-
-              <textarea
-                v-else-if="item.settingValue.length > 80"
-                v-model="item.settingValue"
-                rows="4"
-                class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-              ></textarea>
-
-              <input
-                v-else
-                v-model="item.settingValue"
-                type="text"
-                class="h-11 w-full rounded-xl border border-gray-300 bg-white px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
-              />
-            </div>
+        <div v-if="loading" class="absolute inset-0 z-10 bg-white/50 dark:bg-gray-900/50 flex items-center justify-center backdrop-blur-sm">
+          <div class="flex flex-col items-center">
+            <svg class="animate-spin h-8 w-8 text-brand-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <span class="text-sm font-medium text-gray-500">加载配置中...</span>
           </div>
         </div>
 
-        <template #footer>
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              更改将立即保存到数据库，并影响后续系统行为。
-            </p>
-            <div class="flex gap-3">
-              <AuthButton
-                text="重新加载"
-                variant="secondary"
-                :disabled="loading"
-                @click="loadSettings"
-              />
-              <AuthButton
-                text="保存设置"
-                variant="primary"
-                :loading="saving"
-                loadingText="保存中..."
-                @click="saveSettings"
-              />
-            </div>
+        <div class="p-5 md:p-8">
+           <component :is="activePanelComponent" />
+        </div>
+
+        <div class="bg-gray-50 border-t border-gray-200 p-4 sm:px-8 dark:bg-gray-800/40 dark:border-gray-800 flex flex-wrap items-center justify-between gap-3">
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            修改配置将立即生效，如有必要，安全设置更替将重置当前活动的所有会话。
+          </p>
+          <div class="flex gap-3 w-full sm:w-auto">
+            <AuthButton
+              text="还原默认"
+              variant="secondary"
+              :disabled="loading || saving"
+              class="flex-1 sm:flex-none"
+              @click="loadSettings"
+            />
+            <AuthButton
+              text="保存设置"
+              variant="primary"
+              :loading="saving"
+              loadingText="执行中..."
+              class="flex-1 sm:flex-none"
+              @click="saveSettings"
+            />
           </div>
-        </template>
-      </AuthCard>
+        </div>
+      </div>
     </div>
   </AuthLayout>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, reactive, watch, markRaw, provide } from 'vue'
 import { useRoute } from 'vue-router'
 import { AuthButton, AuthCard, AuthLayout } from '@/components/auth'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import adminApi from '@/api/system'
 import ToastAlert from '@/composables/ToastAlert'
 
-interface SettingItem {
-  id?: number
-  groupKey: string
-  settingKey: string
-  settingName: string
-  settingValue: string
-  valueType: string
-  optionsJson?: string
-  isEncrypted?: boolean
-  sort?: number
-  remark?: string
-  boolValue?: boolean
-}
+// Import bespoke config panels
+import BasicSettingsPanel from './Settings/BasicSettingsPanel.vue'
+import SecuritySettingsPanel from './Settings/SecuritySettingsPanel.vue'
+import NotificationSettingsPanel from './Settings/NotificationSettingsPanel.vue'
 
 const route = useRoute()
 const loading = ref(false)
 const saving = ref(false)
-const settings = ref<SettingItem[]>([])
+
+// We hold a local flat key-value state for the bespoke panels to easily bind
+const formData = reactive<Record<string, any>>({})
+
+// Provide the reactive store to child panels uniformly
+provide('settingsFormData', formData)
 
 const groups = [
-  { key: 'basic', label: '基础设置', path: '/auth/settings/basic', title: '基础设置', description: '维护站点名称、注册策略等基础配置。' },
-  { key: 'security', label: '安全设置', path: '/auth/settings/security', title: '安全设置', description: '控制登录失败锁定策略等运行时安全参数。' },
-  { key: 'notification', label: '通知设置', path: '/auth/settings/notification', title: '通知设置', description: '维护站内通知、邮件通知与保留策略。' }
+  { key: 'basic', label: '通用基础设置', path: '/auth/settings/basic', title: '基础应用配置', description: '维护站点的跨域通信、法律备案、基础注册等最基础的信息网。', component: BasicSettingsPanel },
+  { key: 'security', label: '引擎与安全', path: '/auth/settings/security', title: '边界与安全参数', description: '控制高危用户的重试封锁、JWT有效期、全局强制双因素认证。' },
+  { key: 'notification', label: '节点与通知', path: '/auth/settings/notification', title: '通知架构与网关', description: '配置站点外发的物理邮箱、短信通知及内部事件负载留存期。' }
 ] as const
 
 const currentGroup = computed(() => String(route.params.group || 'basic'))
 const groupMeta = computed(() => groups.find((item) => item.key === currentGroup.value) || groups[0])
 const pageTitle = computed(() => groupMeta.value.title)
 
-const normalizeSettings = (payload: unknown): SettingItem[] => {
-  const list = Array.isArray(payload) ? payload : []
-  return list.map((item) => {
-    const normalized = {
-      ...(item as SettingItem),
-      settingValue: String((item as SettingItem).settingValue ?? ''),
-      valueType: (item as SettingItem).valueType || 'text'
-    }
-    normalized.boolValue = normalized.settingValue === 'true'
-    return normalized
-  })
-}
-
-const valueTypeLabel = (valueType?: string) => {
-  switch (valueType) {
-    case 'switch':
-      return '开关'
-    case 'number':
-      return '数字'
+const activePanelComponent = computed(() => {
+  switch (currentGroup.value) {
+    case 'security': return markRaw(SecuritySettingsPanel)
+    case 'notification': return markRaw(NotificationSettingsPanel)
+    case 'basic':
     default:
-      return '文本'
+      return markRaw(BasicSettingsPanel)
+  }
+})
+
+// Definition lists to map bespoke fields to their Database representations
+const fieldDefaults: Record<string, Record<string, {name: string, type: string, default: any}>> = {
+  'basic': {
+    'basic.site_name': { name: '系统名称', type: 'text', default: '企业级后台' },
+    'basic.site_slogan': { name: '系统副标题', type: 'text', default: '中台基座' },
+    'basic.site_domain': { name: '主域名', type: 'text', default: 'admin.example.com' },
+    'basic.company_name': { name: '企业名称', type: 'text', default: '' },
+    'basic.icp_beian': { name: 'ICP备案', type: 'text', default: '' },
+    'basic.gongan_beian': { name: '公安联网备案', type: 'text', default: '' },
+    'basic.allow_register': { name: '开放注册', type: 'switch', default: false },
+    'basic.force_watermark': { name: '全站水印', type: 'switch', default: false },
+  },
+  'security': {
+    'security.login_failed_limit': { name: '最大登录失败', type: 'number', default: 5 },
+    'security.lock_minutes': { name: '冻结时长', type: 'number', default: 30 },
+    'security.session_timeout_hours': { name: '凭据有效期', type: 'number', default: 24 },
+    'security.force_strong_pwd': { name: '强制强密码', type: 'switch', default: true },
+  },
+  'notification': {
+    'notification.enable_site_notice': { name: '启用全局系统通知', type: 'switch', default: true },
+    'notification.smtp_enable': { name: '启用SMTP', type: 'switch', default: false },
+    'notification.smtp_host': { name: 'SMTP主机', type: 'text', default: '' },
+    'notification.smtp_port': { name: '端口', type: 'number', default: 465 },
+    'notification.smtp_user': { name: 'SMTP账号', type: 'text', default: '' },
+    'notification.smtp_pass': { name: 'SMTP密码', type: 'text', default: '' },
+    'notification.auto_clean_read': { name: '自动瘦身已读通知', type: 'switch', default: true },
+    'notification.route_alerts_to_admin': { name: '致命告警抄送短信', type: 'switch', default: false },
   }
 }
 
@@ -189,15 +147,32 @@ const loadSettings = async () => {
   try {
     loading.value = true
     const { data: res } = await adminApi.getSettingList(currentGroup.value)
-    if (res.code !== 200) {
-      throw new Error(res.message || '获取系统设置失败')
+
+    // Reset local formData block
+    for(const k in formData) delete formData[k]
+
+    const defs = fieldDefaults[currentGroup.value] || {}
+    // Seed defaults
+    for(const key in defs) {
+      formData[key] = defs[key].default
     }
-    settings.value = normalizeSettings(res.data)
+
+    if (res.code === 200 && Array.isArray(res.data) && res.data.length > 0) {
+      // Overlay database loaded values
+      res.data.forEach(item => {
+        if (item.valueType === 'switch') {
+          formData[item.settingKey] = (item.settingValue === 'true')
+        } else if (item.valueType === 'number') {
+          formData[item.settingKey] = Number(item.settingValue) || 0
+        } else {
+          formData[item.settingKey] = item.settingValue
+        }
+      })
+    }
   } catch (error) {
-    settings.value = []
     ToastAlert.error({
-      title: '加载失败',
-      message: error instanceof Error ? error.message : '系统设置加载失败'
+      title: '加载底座环境失败',
+      message: error instanceof Error ? error.message : '服务掉线'
     })
   } finally {
     loading.value = false
@@ -205,31 +180,37 @@ const loadSettings = async () => {
 }
 
 const saveSettings = async () => {
-  if (settings.value.length === 0) {
-    return
-  }
-
   try {
     saving.value = true
-    const payload = settings.value.map((item) => ({
-      ...item,
-      settingValue: item.valueType === 'switch' ? String(Boolean(item.boolValue)) : String(item.settingValue ?? '')
-    }))
+    const defs = fieldDefaults[currentGroup.value] || {}
+
+    // Map formData to SettingItem array
+    const payload = Object.keys(defs).map(key => {
+      const fieldDef = defs[key]
+      let stringValue = String(formData[key] || '')
+      if (fieldDef.type === 'switch') stringValue = Boolean(formData[key]) ? 'true' : 'false'
+
+      return {
+        groupKey: currentGroup.value,
+        settingKey: key,
+        settingName: fieldDef.name,
+        settingValue: stringValue,
+        valueType: fieldDef.type,
+      }
+    })
 
     const { data: res } = await adminApi.batchUpdateSettings(payload)
-    if (res.code !== 200) {
-      throw new Error(res.message || '系统设置保存失败')
-    }
+    if (res.code !== 200) throw new Error(res.message || '环境快照封存失败')
 
     ToastAlert.success({
-      title: '保存成功',
-      message: `${groupMeta.value.title}已更新`
+      title: '部署架构应用成功',
+      message: `${groupMeta.value.title} 参数已热刷新并在后方集群生效`
     })
-    await loadSettings()
+
   } catch (error) {
     ToastAlert.error({
-      title: '保存失败',
-      message: error instanceof Error ? error.message : '系统设置保存失败'
+      title: '部署失败',
+      message: error instanceof Error ? error.message : '通信中断'
     })
   } finally {
     saving.value = false

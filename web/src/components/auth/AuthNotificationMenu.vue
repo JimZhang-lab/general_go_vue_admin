@@ -4,8 +4,8 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/components/auth/AuthNotificationMenu.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
   <div class="relative" ref="dropdownRef">
@@ -262,6 +262,23 @@ const handleNotificationClick = async (notification: CurrentNotice) => {
   }
 }
 
+let pollingInterval: ReturnType<typeof setInterval> | null = null
+
+const startPolling = () => {
+  // 按照企业级架构，每 30 秒静默轮询一次通知
+  pollingInterval = setInterval(async () => {
+    try {
+      const { data: res } = await adminApi.getCurrentNotices({ limit: 8 })
+      if (res.code === 200) {
+        notifications.value = resolveList(res.data)
+      }
+    } catch (e) {
+      // 静默轮询失败不提示，避免打扰用户
+      console.warn("通知静默轮询失败", e)
+    }
+  }, 30000)
+}
+
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as Node
   if (dropdownRef.value && !dropdownRef.value.contains(target)) {
@@ -272,10 +289,12 @@ const handleClickOutside = (event: MouseEvent) => {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   loadNotifications()
+  startPolling()
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  if (pollingInterval) clearInterval(pollingInterval)
 })
 </script>
 

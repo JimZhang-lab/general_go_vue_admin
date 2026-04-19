@@ -120,11 +120,13 @@ func regsiterAdminPlatformRouter(router *gin.Engine) {
 		jwtGroup.PUT("/admin/updatePersonalPassword", controller.UpdatePersonalPassword)
 
 		jwtGroup.GET("/sysLoginInfo/list", middleware.PermissionMiddleware("system:log:list"), controller.GetSysLoginInfoList)
+		jwtGroup.GET("/sysLoginInfo/export", middleware.PermissionMiddleware("system:log:export"), controller.ExportSysLoginInfo)
 		jwtGroup.DELETE("/sysLoginInfo/batch/delete", middleware.PermissionMiddleware("system:log:delete"), controller.BatchDeleteSysLoginInfo)
 		jwtGroup.DELETE("/sysLoginInfo/delete", middleware.PermissionMiddleware("system:log:delete"), controller.DeleteSysLoginInfoById)
 		jwtGroup.DELETE("/sysLoginInfo/clean", middleware.PermissionMiddleware("system:log:clean"), controller.CleanSysLoginInfo)
 
 		jwtGroup.GET("/sysOperationLog/list", middleware.PermissionMiddleware("system:log:list"), controller.GetSysOperationLogList)
+		jwtGroup.GET("/sysOperationLog/export", middleware.PermissionMiddleware("system:log:export"), controller.ExportSysOperationLog)
 		jwtGroup.DELETE("/sysOperationLog/delete", middleware.PermissionMiddleware("system:log:delete"), controller.DeleteSysOperationLogById)
 		jwtGroup.DELETE("/sysOperationLog/batch/delete", middleware.PermissionMiddleware("system:log:delete"), controller.BatchDeleteSysOperationLog)
 		jwtGroup.DELETE("/sysOperationLog/clean", middleware.PermissionMiddleware("system:log:clean"), controller.CleanSysOperationLog)
@@ -155,5 +157,6 @@ func regsiterAdminPlatformRouter(router *gin.Engine) {
 
 		// 系统监控路由
 		jwtGroup.GET("/monitor/server", controller.GetServerMonitorInfo)
+		jwtGroup.GET("/monitor/dashboard", controller.GetDashboardStats)
 	}
 }

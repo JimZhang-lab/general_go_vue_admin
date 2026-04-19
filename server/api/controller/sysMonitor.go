@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"runtime"
+	"server/api/dao"
 	"server/common/result"
 	"time"
 
@@ -40,4 +41,18 @@ func GetServerMonitorInfo(c *gin.Context) {
 		"os":  osInfo,
 		"mem": memInfo,
 	})
+}
+
+// 聚合获取首页 Dashboard 的数据
+// @Summary 获取大盘统计数据
+// @Produce json
+// @router /api/monitor/dashboard [get]
+// @Security ApiKeyAuth
+func GetDashboardStats(c *gin.Context) {
+	stats, err := dao.GetDashboardStats()
+	if err != nil {
+		result.Failed(c, int(result.ApiCode.FAILED), "获取统计大盘失败")
+		return
+	}
+	result.Success(c, stats)
 }

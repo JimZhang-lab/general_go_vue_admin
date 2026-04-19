@@ -4,8 +4,8 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/components/auth/AuthSidebar.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
   <aside
@@ -204,6 +204,8 @@ import {
   DocsIcon,
   SettingsIcon as CogIcon,
   BarChartIcon,
+  TableIcon,
+  BoxCubeIcon,
 } from "@/icons";
 import AuthSidebarWidget from "./AuthSidebarWidget.vue";
 
@@ -257,6 +259,12 @@ const authMenuGroups = [
         path: "/auth/logs",
         permissions: ["system:log:list"],
       },
+      {
+        icon: BoxCubeIcon,
+        name: "系统监控",
+        path: "/auth/monitor",
+        permissions: ["system:monitor:list"],
+      },
     ],
   },
   {
@@ -282,6 +290,12 @@ const authMenuGroups = [
           { name: "安全设置", path: "/auth/settings/security", permissions: ["system:setting:list"] },
           { name: "通知设置", path: "/auth/settings/notification", permissions: ["system:setting:list"] },
         ],
+      },
+      {
+        icon: TableIcon,
+        name: "数据字典",
+        path: "/auth/dict",
+        permissions: ["system:dict:list"],
       },
     ],
   },
@@ -386,8 +400,8 @@ const endTransition = (el) => {
 }
 
 .menu-item-active {
-  background-color: rgb(239 246 255);
-  color: rgb(29 78 216);
+  background-color: rgb(243 232 255); /* purple-100 */
+  color: rgb(126 34 206); /* purple-700 */
 }
 
 .menu-item-inactive {
@@ -400,7 +414,7 @@ const endTransition = (el) => {
 }
 
 .menu-item-icon-active {
-  color: rgb(37 99 235);
+  color: rgb(147 51 234); /* purple-600 */
 }
 
 .menu-item-icon-inactive {
@@ -422,8 +436,8 @@ const endTransition = (el) => {
 }
 
 .submenu-item-active {
-  background-color: rgb(239 246 255);
-  color: rgb(29 78 216);
+  background-color: rgb(243 232 255); /* purple-100 */
+  color: rgb(126 34 206); /* purple-700 */
 }
 
 .submenu-item-inactive {
@@ -442,8 +456,8 @@ const endTransition = (el) => {
 /* 暗色模式 */
 @media (prefers-color-scheme: dark) {
   .menu-item-active {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: rgb(96 165 250);
+    background-color: rgba(168, 85, 247, 0.15); /* purple-500/15 */
+    color: rgb(192 132 252); /* purple-400 */
   }
 
   .menu-item-inactive {
@@ -456,7 +470,7 @@ const endTransition = (el) => {
   }
 
   .menu-item-icon-active {
-    color: rgb(96 165 250);
+    color: rgb(192 132 252); /* purple-400 */
   }
 
   .menu-item-icon-inactive {
@@ -464,8 +478,8 @@ const endTransition = (el) => {
   }
 
   .submenu-item-active {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: rgb(96 165 250);
+    background-color: rgba(168, 85, 247, 0.15); /* purple-500/15 */
+    color: rgb(192 132 252); /* purple-400 */
   }
 
   .submenu-item-inactive {

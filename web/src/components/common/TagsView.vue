@@ -4,8 +4,8 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/components/common/TagsView.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
   <div class="tags-view-container border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 w-full shadow-sm">
@@ -14,7 +14,7 @@
         v-for="tag in visitedViews"
         ref="tag"
         :key="tag.path"
-        :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
+        :to="{ path: tag.path, query: tag.query }"
         :class="['tags-view-item relative inline-flex items-center px-3 py-1.5 mx-1 border text-sm font-medium rounded-md transition-colors duration-200 whitespace-nowrap', isActive(tag) ? 'bg-brand-50 border-brand-200 text-brand-600 dark:bg-brand-500/10 dark:border-brand-500/30 dark:text-brand-400' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700']"
         @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"
         @contextmenu.prevent="openMenu(tag, $event)"
@@ -155,8 +155,8 @@ const openMenu = (tag: TagView, e: MouseEvent) => {
   const offsetLeft = scrollPane.value?.getBoundingClientRect().left ?? 0
   const offsetWidth = scrollPane.value?.offsetWidth ?? 0
   const maxLeft = offsetWidth - menuMinWidth
-  const mouseLeft = e.clientX - offsetLeft + 15 
-  
+  const mouseLeft = e.clientX - offsetLeft + 15
+
   if (mouseLeft > maxLeft) {
     left.value = maxLeft
   } else {
@@ -166,7 +166,7 @@ const openMenu = (tag: TagView, e: MouseEvent) => {
   // Find a good general relative coordinate based on layout
   left.value = e.clientX + 10;
   top.value = e.clientY + 10;
-  
+
   visible.value = true
   selectedTag.value = tag
 }

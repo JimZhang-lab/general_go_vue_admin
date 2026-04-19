@@ -4,8 +4,8 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/views/Auth/PostManagement.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
   <AuthLayout>
@@ -227,10 +227,10 @@
     <!-- 添加/编辑岗位模态框 -->
     <div v-if="showAddModal || showEditModal" class="fixed inset-0 overflow-y-auto h-full w-full z-99999">
       <div class="fixed inset-0 bg-black/50" @click="closeModal"></div>
-      <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+      <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-xl bg-white dark:bg-gray-800 dark:border-gray-700">
         <div class="mt-3">
           <div class="flex justify-between items-center">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
               {{ showAddModal ? '添加岗位' : '编辑岗位' }}
             </h3>
             <button
@@ -246,22 +246,22 @@
           <form @submit.prevent="submitForm" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">岗位名称 *</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">岗位名称 *</label>
                 <input
                   v-model="postForm.postName"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">岗位编号 *</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">岗位编号 *</label>
                 <input
                   v-model="postForm.postCode"
                   type="text"
                   required
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -270,7 +270,7 @@
                 <input
                   v-model.number="postForm.sort"
                   type="number"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -278,7 +278,7 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
                 <select
                   v-model="postForm.status"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="1">启用</option>
                   <option value="2">禁用</option>
@@ -299,13 +299,13 @@
               <button
                 type="button"
                 @click="closeModal"
-                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 取消
               </button>
               <button
                 type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow-md"
               >
                 {{ showAddModal ? '添加' : '更新' }}
               </button>

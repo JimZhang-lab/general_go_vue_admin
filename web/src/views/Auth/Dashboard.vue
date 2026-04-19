@@ -4,13 +4,13 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/views/Auth/Dashboard.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
   <AuthLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
-    
+
     <div class="grid grid-cols-12 gap-4 md:gap-6">
       <!-- 统计卡片 -->
       <div class="col-span-12 space-y-6 xl:col-span-8">
@@ -268,86 +268,43 @@ const systemStatus = ref<SystemStatus>({
 
 const loadDashboardData = async () => {
   try {
-    const [adminResp, roleResp, menuResp, loginResp, operationResp] = await Promise.all([
-      adminApi.getAdminList({ pageNum: 1, pageSize: 200 }),
-      adminApi.getRoleList({ pageNum: 1, pageSize: 200 }),
-      adminApi.getMenuList({}),
-      adminApi.getLoginLogs({ pageNum: 1, pageSize: 50 }),
-      adminApi.getOperationLogs({ pageNum: 1, pageSize: 8 })
-    ])
+    const { data: res } = await adminApi.getDashboardStats()
 
-    if (
-      adminResp.data.code !== 200 ||
-      roleResp.data.code !== 200 ||
-      menuResp.data.code !== 200 ||
-      loginResp.data.code !== 200 ||
-      operationResp.data.code !== 200
-    ) {
-      throw new Error('部分统计接口返回异常')
+    if (res.code !== 200) {
+      throw new Error(res.message || '获取大盘统计失败')
     }
 
-    const adminPayload = adminResp.data.data
-    const rolePayload = roleResp.data.data
-    const menuPayload = menuResp.data.data
-    const loginPayload = loginResp.data.data
-    const operationPayload = operationResp.data.data
-
-    const adminList = resolveList<{ status?: string | number }>(adminPayload)
-    const loginList = resolveList<{ username?: string; loginStatus?: number; loginTime?: string }>(loginPayload)
-    const operationList = resolveList<{ id?: number; username?: string; method?: string; url?: string; createTime?: string }>(operationPayload)
-
-    const onlineThreshold = Date.now() - 30 * 60 * 1000
-    const onlineUsers = new Set(
-      loginList
-        .filter((item) => item.loginStatus === 1 && item.loginTime && new Date(item.loginTime).getTime() >= onlineThreshold)
-        .map((item) => item.username || '')
-        .filter(Boolean)
-    )
-
-    const adminCount = resolveTotal(adminPayload)
-    const roleCount = resolveTotal(rolePayload)
-    const permissionCount = resolveList(menuPayload).length
-    const onlineCount = onlineUsers.size
+    const payload = res.data
 
     stats.value = {
-      adminCount,
-      roleCount,
-      permissionCount,
-      onlineCount
+      adminCount: payload.adminCount || 0,
+      roleCount: payload.roleCount || 0,
+      permissionCount: payload.permissionCount || 0,
+      onlineCount: payload.onlineCount || 0
     }
-
-    const successLogins = loginList.filter((item) => item.loginStatus === 1).length
-    const loginSuccessRate = loginList.length ? Math.round((successLogins / loginList.length) * 100) : 0
-    const enabledAdmins = adminList.filter((item) => Number(item.status) === 1).length
-    const enabledRate = adminList.length ? Math.round((enabledAdmins / adminList.length) * 100) : 0
-    const onlineRate = adminCount > 0 ? Math.round((onlineCount / adminCount) * 100) : 0
 
     systemStatus.value = {
-      loginSuccessRate,
-      enabledRate,
-      onlineRate
+      loginSuccessRate: Math.round(payload.loginSuccessRate || 0),
+      enabledRate: Math.round(payload.enabledRate || 0),
+      onlineRate: Math.round(payload.onlineRate || 0)
     }
 
-    if (operationList.length > 0) {
-      recentActivities.value = operationList.map((item, index) => ({
+    if (Array.isArray(payload.recentActivities)) {
+      recentActivities.value = payload.recentActivities.map((item: any, index: number) => ({
         id: item.id ?? index + 1,
-        action: `${item.method || '操作'} ${item.url || ''}`.trim(),
-        user: item.username || '未知用户',
-        time: formatRelativeTime(item.createTime)
+        action: item.action || '操作',
+        user: item.user || '未知用户',
+        time: formatRelativeTime(item.time)
       }))
     } else {
-      recentActivities.value = loginList.slice(0, 8).map((item, index) => ({
-        id: index + 1,
-        action: item.loginStatus === 1 ? '用户登录成功' : '用户登录失败',
-        user: item.username || '未知用户',
-        time: formatRelativeTime(item.loginTime)
-      }))
+      recentActivities.value = []
     }
+
   } catch (error) {
     console.error('加载总览数据失败:', error)
     ToastAlert.error({
       title: '加载失败',
-      message: '权限总览数据加载失败，请稍后重试'
+      message: '统计大盘数据加载失败，服务不可用'
     })
   }
 }

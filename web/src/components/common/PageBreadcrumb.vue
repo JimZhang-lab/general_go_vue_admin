@@ -4,8 +4,8 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/components/common/PageBreadcrumb.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
   <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
@@ -47,7 +47,6 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
 
 interface BreadcrumbProps {
   pageTitle: string

@@ -399,7 +399,6 @@ class AdminApi{
       })
     }
 
-
     // 角色下拉列表
     getRoleSelectList(): Promise<{ data: ApiResponse }> {
       return request({
@@ -544,12 +543,32 @@ class AdminApi{
     }
 
     // 删除单条操作日志
-    deleteOperationLog(id: number): Promise<{ data: ApiResponse }> {
+    deleteSysOperationLog(id: number): Promise<{ data: ApiResponse }> {
       return request({
         url: '/sysOperationLog/delete',
         method: 'delete',
-        data: { id }
+        params: { id }
       })
+    }
+
+    // -------------------------
+    // 系统监控管理
+    // -------------------------
+
+    // 获取服务器监控信息
+    getServerMonitorInfo(): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/monitor/server',
+        method: 'get'
+      });
+    }
+
+    // 获取 Dashboard 大盘数据
+    getDashboardStats(): Promise<{ data: ApiResponse }> {
+      return request({
+        url: '/monitor/dashboard',
+        method: 'get'
+      });
     }
 
     // 批量删除操作日志
@@ -558,6 +577,16 @@ class AdminApi{
         url: '/sysOperationLog/batch/delete',
         method: 'delete',
         data: { ids }
+      })
+    }
+
+    // 导出演作日志
+    exportOperationLogs(params: LogParams): Promise<Blob> {
+      return request({
+        url: '/sysOperationLog/export',
+        method: 'get',
+        params,
+        responseType: 'blob'
       })
     }
 
@@ -575,6 +604,16 @@ class AdminApi{
         url: '/sysLoginInfo/list',
         method: 'get',
         params
+      })
+    }
+
+    // 导出登录日志
+    exportLoginLogs(params: LoginLogParams): Promise<Blob> {
+      return request({
+        url: '/sysLoginInfo/export',
+        method: 'get',
+        params,
+        responseType: 'blob'
       })
     }
 

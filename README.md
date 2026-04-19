@@ -1,93 +1,153 @@
-# General Go Vue Admin
+# General Go Vue Admin (企业级通用后台管理套件)
 
-## Project Description
+## 项目简介
 
-General Go Vue Admin is an enterprise-grade backend management system designed to provide a robust, scalable, and highly performant architecture. It implements a strict separation of frontend and backend environments. The backend is built on the Go language utilizing the Gin web framework and GORM for database interactions. The frontend leverages Vue 3, Composition API, TypeScript, Vite, and Tailwind CSS to deliver an optimal and highly responsive user interface featuring modern Glassmorphism aesthetics.
+**General Go Vue Admin** 是一套面向企业级开发的、前后端分离的高性能通用后台管理系统。
+本项目在架构上进行了严格的解耦与模块化设计：
 
-This system is engineered for stability and security, incorporating high-concurrency capabilities, dynamic role-based access control (RBAC), and persistent state management, making it an ideal foundation for complex business applications.
+- **后端** 采用 Go 语言构建，核心依托于高并发的 Gin Web 框架与 GORM 数据对象映射组件，提供安全、稳定、极速的 RESTful API。
+- **前端** 基于 Vue 3、Composition API（组合式 API）、TypeScript 构建，并结合了 Vite 的极速极速冷启动和构建能力，页面 UI 采用 Tailwind CSS，实现了一套现代化、响应式且支持深度定制的暗黑模式（Dark Mode）和玻璃拟物化（Glassmorphism）的优美界面。
 
-## Core Features
+系统内置了完善的安全控制与并发管理，原生自带基于 JWT 的 RBAC（基于角色的访问控制）权限流转、动态路由渲染、前端多页签缓存等企业级必须特性，是快速搭建复杂中后台业务系统的绝佳脚手架底座。
 
-- **Dynamic RBAC Authorization**: Granular control over permissions and data access based on hierarchical Roles, Departments, and Posts.
-- **Frontend-Backend Decoupling**: API-first design using standard RESTful interfaces with JWT-based stateless authentication.
-- **Micro-Frontend Architecture**: Multi-tab (TagsView) keep-alive navigation caching ensures operational state is preserved across route transitions.
-- **System Administration Modules**: Comprehensive modules for User, Role, Menu, Department, and Post management.
-- **Data Dictionary System**: Flexible configuration layer for mapping business variables internally without hardcoded values.
-- **Operation Audit Trails**: Detailed and automated logging of system events, logins, and API mutations.
-- **High Concurrency Stability**: Built-in concurrency managers, rate limiters, timeout wrappers, and circuit breakers mapped at the middleware routing layer.
+---
 
-## Technology Stack
+## 核心功能模块
 
-### Backend
-- **Go**: Version 1.22+
-- **Gin**: High-performance HTTP web framework
-- **GORM**: Object-Relational Mapping framework
-- **MySQL**: Relational database storage
-- **Redis**: In-memory data store for caching and queues
-- **JWT**: Token-based authentication
+- **🔐 动态 RBAC 权限引擎**：从按钮级操作指令到页面路由加载，支持根据“用户 -> 角色 -> 部门 -> 岗位”体系进行极其精细的权限下发与校验。
+- **🧩 前后端彻底解耦**：采用严格的 RESTful API 规范定义接口，使用 JWT (JSON Web Token) 进行无状态的身份签发与验证，防止跨站伪造请求。
+- **🖥 多标签页导航 (TagsView)**：原生的 Keep-Alive 多视图页签支持，切换页面时完美保留用户的查询、表单输入等临时操作状态。
+- **⚙️ 系统管理矩阵**：开箱即用的「管理员管理」、「角色分配」、「菜单授权配置」、「部门架构」、「岗位管理」五个核心组织管理模块。
+- **📖 动态数据字典**：提供「数据字典」映射引擎。业务中所有需要枚举的变量（如性别、状态值）不再硬编码，可全部在后台界面动态增删改查。
+- **📊 监控与日志审计**：
+  - **系统运行监控**：实时查看 Go 协程、CPU 逻辑核、内存大盘分配等底层硬件消耗。
+  - **操作审计日志**：自动记录所有 API 级别的改动请求记录与终端 IP 来源。
+  - **账号登录日志**：记录详尽的后台成功与失败登录足迹、设备环境等安全防线信息。
 
-### Frontend
-- **Vue 3**: Reactive UI framework focusing on the Composition API
-- **Vite**: Next-generation frontend tooling and bundler
-- **TypeScript**: Static typing for structural soundness
-- **Pinia**: Intuitive and type-safe state management
-- **Tailwind CSS**: Utility-first CSS framework for rapid UI styling
-- **Vue Router**: Official routing with dynamic permission tree integration
+---
 
-## Development Environment Setup
+## 初始登录凭证
 
-### Prerequisites
-- Go 1.22 or higher
-- Node.js 18 or higher
-- MySQL 8.0 or higher
-- Redis 6.0 or higher
-- Yarn or npm package manager
+安装并启动系统后，你可以使用系统预设的默认超级管理员账号登录并体验完整功能：
 
-### Backend Initialization
-1. Navigate to the server directory:
-   `cd server`
-2. Duplicate the configuration template and establish database credentials:
-   `cp config.yaml.example config.yaml`
-3. Download Go modules:
-   `go mod tidy`
-4. Start the backend service using Air (for live-reloading) or Go:
-   `air` or `go run main.go`
+> **默认超级管理员账号**: `admin`
+> **默认密码**: `admin123` 或 `admin123456`
+> *(如运行了特定的数据库抹除或自定义初始化脚本，请以实际生成的密码为准)*
 
-### Frontend Initialization
-1. Navigate to the frontend directory:
-   `cd web`
-2. Install package dependencies:
-   `yarn install` or `npm install`
-3. Start the Vite development server:
-   `yarn dev` or `npm run dev`
+*(⚠️ **安全警告**: 部署至生产环境前，请务必在【个人中心】或【管理员管理】中修改您的初始密码！)*
 
-## Deployment
+---
 
-For production deployment, ensure the frontend is compiled into static assets and the Go application is built into a standalone binary.
+## 核心技术栈
 
-1. Build the frontend:
-   `cd web`
-   `yarn build`
-   This will generate a `dist` directory. Serve these files via Nginx or equivalent web servers.
-2. Build the backend:
-   `cd server`
-   `GOOS=linux GOARCH=amd64 go build -o server main.go`
+### 服务端 (Backend)
 
-## Directory Structure Overview
+- **Go**: `v1.22+` (强并发及静态类型检查)
+- **Gin**: 市面压测顶级的轻量级 HTTP Web 路由框架
+- **GORM**: 灵活强大的 ORM 框架，无缝处理多表关联
+- **MySQL**: `v8.0+` (企业关系型数据存储引擎)
+- **Redis**: `v6.0+` (作为 Token 白名单池、高频数据缓存及图形验证码中间件)
+- **JWT**: 用于用户的跨域认证和接口加密拦截
 
-- `/server`
-  - `/api`: Contains Controller, Service, DAO, and Entity definitions.
-  - `/common`: Configuration loading, constants, and structured response formatters.
-  - `/middleware`: Authentication, CORS, logging, and concurrency middlewares.
-  - `/pkg`: Extended utilities and plugins (Database, Redis, JWT encapsulation).
-  - `/router`: Centralized route multiplexing and handlers.
-- `/web`
-  - `/src/api`: Unified API endpoint wrappers mapping to the backend.
-  - `/src/components`: Reusable UI components including foundational layouts and widgets.
-  - `/src/router`: Frontend routing arrays with navigation guards.
-  - `/src/stores`: Pinia states definitions for user profile, authentication, and Multi-Tab tags.
-  - `/src/views`: Domain-specific pages and modular templates.
+### 客户端 (Frontend)
 
-## License
+- **Vue 3**: `v3.3+` (极速和极致响应性的渲染层)
+- **Vite**: `v5+` (替换 Webpack 的次世代极速打包构建工具)
+- **TypeScript**: 提供企业级协作必不可少的变量静态类型预测
+- **Pinia**: 抛弃 Vuex 后的全新一代轻量、类型安全的状态管理机
+- **Tailwind CSS**: 原子化 CSS 引擎，零基础写出极其规范优美的页面组件
+- **Vue Router**: 深度集成了异步权限拉取和动态路由表构建
 
-This project operates under the constraints defined within the workspace and is intended for internal commercial deployment architectures.
+---
+
+## 本地开发环境部署
+
+### 环境前置要求
+
+- **Golang**: `>= 1.22`
+- **Node.js**: `>= 18.x`
+- **MySQL**: `>= 8.0`
+- **Redis**: `>= 6.0` (必须开启以通过图形验证码及缓存)
+- 包管理工具: `Yarn` 或 `npm`
+
+### 1. 服务端运行 (Server)
+
+1. 进入后端目录：
+   ```bash
+   cd server
+   ```
+2. 初始化数据库配置文件（请根据你本地 MySQL 和 Redis 的账号密码进行修改）：
+   ```bash
+   cp config.yaml.example config.yaml
+   ```
+3. 下载 Go 依赖库 (需确保网络允许或开启 GOPROXY)：
+   ```bash
+   go mod tidy
+   ```
+4. 运行后端服务 (推荐使用 `Air` 实现热重载，或直接 `go run`)：
+   ```bash
+   air
+   # 或者使用原生命令: go run main.go
+   ```
+
+### 2. 客户端运行 (Web)
+
+1. 进入前端工程目录：
+   ```bash
+   cd web
+   ```
+2. 安装 NPM 依赖库：
+   ```bash
+   yarn install
+   # 或者 npm install
+   ```
+3. 启动 Vite 开发服务器：
+   ```bash
+   yarn dev
+   # 或者 npm run dev
+   ```
+
+---
+
+## 生产环境编译发布
+
+当项目准备部署到生产级 Linux 或 Docker 容器时，请按照以下步骤分别打出静态资源和执行文件：
+
+1. **前端资源编译**：
+
+   ```bash
+   cd web
+   yarn build
+   ```
+
+   *编译成功后会生成 `dist/` 文件夹。将该目录配置到你服务器的 Nginx `root` / `alias` 静态资源反向代理路径中即可。*
+2. **服务端跨平台编译**：
+
+   ```bash
+   cd server
+   # 以 Linux 为例进行交叉编译
+   GOOS=linux GOARCH=amd64 go build -o server_app main.go
+   ```
+
+   *将打包好的可运行二进制文件 `server_app` 和对应的 `config.yaml` 扔到服务器后台常驻守护进程执行（如 `systemd` 或 `supervisor` 监控）。*
+
+---
+
+## 目录结构速览
+
+```text
+general_go_vue_admin/
+├── server/                     # Golang 纯净服务端
+│   ├── api/                    # 业务控制层(Controller)、逻辑层(Service)、数据访问层(DAO)及实体(Entity)
+│   ├── common/                 # 全局常量、配置结构映射与统一 JSON 返回实体
+│   ├── middleware/             # 核心洋葱模型中间件（全局Auth拦截、CORS、IP及操作日志记录）
+│   ├── pkg/                    # Core 插件和引擎挂载（数据库连接池、Redis组件、JWT及Captcha封装）
+│   └── router/                 # 分发给各个控制器的全局路由集线器
+│
+└── web/                        # Vue 3 纯净客户端
+    ├── src/api/                # 对应后端的 Axios 请求响应拦截与接口定义
+    ├── src/components/         # 全局通用 UI 组件库（骨架布局 AuthLayout、小部件 Widget 等）
+    ├── src/router/             # 前端控制的路由表及根据 Token 的异步 beforeEnter 导航守卫
+    ├── src/stores/             # Pinia 全局状态（存储多页签 Tabs、用户 AuthToken 及动态权限组）
+    └── src/views/              # 具体功能界面（登入页、图表大盘及业务设置页）
+```

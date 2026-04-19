@@ -4,11 +4,11 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/views/Auth/Profile.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
-  <AdminLayout>
+  <AuthLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
 
     <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6">
@@ -36,12 +36,12 @@
                   </svg>
                 </button>
               </div>
-              
+
               <!-- 用户基本信息 -->
               <h3 class="mt-4 text-lg font-medium text-gray-900">{{ userInfo.username }}</h3>
               <p class="text-sm text-gray-500">{{ userInfo.email || '未设置邮箱' }}</p>
               <p class="text-sm text-gray-500">{{ userInfo.phone || '未设置手机号' }}</p>
-              
+
               <!-- 状态标签 -->
               <div class="mt-4">
                 <span
@@ -51,7 +51,7 @@
                   {{ isUserEnabled ? '正常' : '禁用' }}
                 </span>
               </div>
-              
+
               <!-- 最后登录信息 -->
               <div class="mt-4 text-sm text-gray-500">
                 <p>最后登录: {{ formatDate(userInfo.lastLoginTime) }}</p>
@@ -66,7 +66,7 @@
           <!-- 基本信息表单 -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-medium text-gray-900 mb-4">基本信息</h3>
-            
+
             <form @submit.prevent="updateProfile" class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -79,7 +79,7 @@
                   />
                   <p class="text-xs text-gray-500 mt-1">用户名不可修改</p>
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">手机号 *</label>
                   <input
@@ -89,7 +89,7 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
                   <input
@@ -98,7 +98,7 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                
+
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-1">昵称</label>
                   <input
@@ -108,7 +108,7 @@
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
                 <textarea
@@ -118,7 +118,7 @@
                   placeholder="请输入个人简介..."
                 ></textarea>
               </div>
-              
+
               <div class="flex justify-end">
                 <button
                   type="submit"
@@ -134,7 +134,7 @@
           <!-- 修改密码表单 -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-medium text-gray-900 mb-4">修改密码</h3>
-            
+
             <form @submit.prevent="changePassword" class="space-y-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">当前密码 *</label>
@@ -145,7 +145,7 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">新密码 *</label>
                 <input
@@ -157,7 +157,7 @@
                 />
                 <p class="text-xs text-gray-500 mt-1">密码长度至少6位</p>
               </div>
-              
+
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">确认新密码 *</label>
                 <input
@@ -167,7 +167,7 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <div class="flex justify-end">
                 <button
                   type="submit"
@@ -183,7 +183,7 @@
           <!-- 登录记录 -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 class="text-lg font-medium text-gray-900 mb-4">最近登录记录</h3>
-            
+
             <div class="space-y-3">
               <div v-for="log in loginLogs" :key="log.id" class="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
                 <div class="flex items-center space-x-3">
@@ -205,7 +205,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div v-if="loginLogs.length === 0" class="text-center py-8 text-gray-500">
               暂无登录记录
             </div>
@@ -219,7 +219,7 @@
       <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
         <div class="mt-3">
           <h3 class="text-lg font-medium text-gray-900 mb-4">上传头像</h3>
-          
+
           <div class="space-y-4">
             <div class="flex justify-center">
               <div class="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
@@ -241,7 +241,7 @@
                 </button>
               </div>
             </div>
-            
+
             <div class="flex justify-end space-x-3">
               <button
                 type="button"
@@ -262,12 +262,12 @@
         </div>
       </div>
     </div>
-  </AdminLayout>
+  </AuthLayout>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import AdminLayout from '@/components/layout/AdminLayout.vue'
+import { AuthLayout } from '@/components/auth'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import adminApi from '@/api/system'
 import ToastAlert from '@/composables/ToastAlert'

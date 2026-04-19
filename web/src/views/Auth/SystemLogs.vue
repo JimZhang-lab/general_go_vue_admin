@@ -4,8 +4,8 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/views/Auth/SystemLogs.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
   <AuthLayout>
@@ -123,29 +123,29 @@
       <!-- 操作日志表格 -->
       <AuthCard v-if="activeTab === 'operation'" title="操作日志">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
+            <thead class="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th class="px-6 py-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">
                   <input
                     type="checkbox"
                     :checked="operationLogs.length > 0 && selectedOperationIds.length === operationLogs.length"
                     @change="toggleAllOperationSelection"
-                    class="h-4 w-4 rounded border border-gray-300 bg-white text-brand-600"
+                    class="h-4 w-4 rounded border border-gray-300 bg-white dark:bg-gray-800 dark:border-gray-700 text-brand-600"
                   />
                 </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户名</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">请求方法</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">请求URL</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP地址</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作时间</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th class="px-6 py-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">ID</th>
+                <th class="px-6 py-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">用户名</th>
+                <th class="px-6 py-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">请求方法</th>
+                <th class="px-6 py-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">请求URL</th>
+                <th class="px-6 py-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">IP地址</th>
+                <th class="px-6 py-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">操作时间</th>
+                <th class="px-6 py-3 text-left text-theme-xs font-medium text-gray-500 dark:text-gray-400 tracking-wider">操作</th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="log in operationLogs" :key="log.id" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <tbody class="bg-white dark:bg-transparent divide-y divide-gray-200 dark:divide-gray-800">
+              <tr v-for="log in operationLogs" :key="log.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                <td class="px-6 py-4 whitespace-nowrap text-theme-sm text-gray-900 dark:text-gray-200">
                   <input
                     type="checkbox"
                     :checked="selectedOperationIds.includes(log.id)"
@@ -153,19 +153,19 @@
                     class="h-4 w-4 rounded border border-gray-300 bg-white text-brand-600"
                   />
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ log.id }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ log.username }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td class="px-6 py-4 whitespace-nowrap text-theme-sm text-gray-900 dark:text-gray-300">{{ log.id }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-theme-sm font-medium text-gray-900 dark:text-gray-200">{{ log.username }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-theme-sm text-gray-900 dark:text-gray-300">
                   <span
                     :class="getMethodClass(log.method)"
-                    class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                    class="inline-flex px-2 py-1 text-theme-xs font-semibold rounded-full dark:border-gray-700"
                   >
                     {{ log.method }}
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 max-w-xs truncate">{{ log.url }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ log.ip }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ formatDate(log.createTime) }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-theme-sm text-gray-900 dark:text-gray-300 max-w-xs truncate">{{ log.url }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-theme-sm text-gray-900 dark:text-gray-300">{{ log.ip }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-theme-sm text-gray-900 dark:text-gray-400">{{ formatDate(log.createTime) }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     @click="viewLogDetail(log)"
@@ -313,7 +313,7 @@
       <div class="relative top-10 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-md bg-white">
         <div class="mt-3">
           <h3 class="text-lg font-medium text-gray-900 mb-4">操作日志详情</h3>
-          
+
           <div v-if="currentLog" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -341,23 +341,23 @@
                 <p class="mt-1 text-sm text-gray-900">{{ formatDate(currentLog.createTime) }}</p>
               </div>
             </div>
-            
+
             <div v-if="currentLog.operParam">
               <label class="block text-sm font-medium text-gray-700">请求参数</label>
               <pre class="mt-1 text-sm text-gray-900 bg-gray-50 p-3 rounded-md overflow-x-auto">{{ formatJson(currentLog.operParam) }}</pre>
             </div>
-            
+
             <div v-if="currentLog.jsonResult">
               <label class="block text-sm font-medium text-gray-700">返回结果</label>
               <pre class="mt-1 text-sm text-gray-900 bg-gray-50 p-3 rounded-md overflow-x-auto">{{ formatJson(currentLog.jsonResult) }}</pre>
             </div>
-            
+
             <div v-if="currentLog.errorMsg">
               <label class="block text-sm font-medium text-gray-700">错误信息</label>
               <p class="mt-1 text-sm text-red-600 bg-red-50 p-3 rounded-md">{{ currentLog.errorMsg }}</p>
             </div>
           </div>
-          
+
           <div class="flex justify-end pt-4 mt-4 border-t">
             <button
               @click="showDetailModal = false"
@@ -663,9 +663,7 @@ const refreshCurrentLogs = () => {
   return getLoginLogs()
 }
 
-const triggerDownload = (filename: string, content: string) => {
-  const blob = new Blob([`\uFEFF${content}`], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
+const triggerDownloadUrl = (filename: string, url: string) => {
   const link = document.createElement('a')
   link.href = url
   link.download = filename
@@ -675,52 +673,36 @@ const triggerDownload = (filename: string, content: string) => {
   URL.revokeObjectURL(url)
 }
 
-const toCsvCell = (value: unknown) => {
-  const text = String(value ?? '').replace(/"/g, '""')
-  return `"${text}"`
-}
-
 // 导出日志
 const exportLogs = async () => {
   try {
     isExporting.value = true
-    const rows = currentLogs.value
-    if (!rows.length) {
-      ToastAlert.warning({
-        title: '暂无数据',
-        message: '当前没有可导出的日志数据'
-      })
-      return
-    }
-
-    let csv = ''
-    if (activeTab.value === 'operation') {
-      const headers = ['ID', '用户名', '请求方法', '请求URL', 'IP地址', '操作时间']
-      const body = (rows as OperationLog[]).map((row) =>
-        [row.id, row.username, row.method, row.url, row.ip, formatDate(row.createTime)].map(toCsvCell).join(',')
-      )
-      csv = [headers.map(toCsvCell).join(','), ...body].join('\n')
-    } else {
-      const headers = ['ID', '用户名', 'IP地址', '登录地点', '浏览器', '操作系统', '状态', '提示消息', '登录时间']
-      const body = (rows as LoginLog[]).map((row) =>
-        [
-          row.id,
-          row.username,
-          row.ipAddress,
-          row.loginLocation,
-          row.browser,
-          row.os,
-          row.loginStatus === 1 ? '成功' : '失败',
-          row.message,
-          formatDate(row.loginTime)
-        ].map(toCsvCell).join(',')
-      )
-      csv = [headers.map(toCsvCell).join(','), ...body].join('\n')
-    }
-
     const dateTag = new Date().toISOString().slice(0, 10)
-    const filename = activeTab.value === 'operation' ? `operation_logs_${dateTag}.csv` : `login_logs_${dateTag}.csv`
-    triggerDownload(filename, csv)
+    let res: any
+
+    if (activeTab.value === 'operation') {
+      res = await adminApi.exportOperationLogs({
+        username: searchForm.username,
+        beginTime: searchForm.beginTime,
+        endTime: searchForm.endTime,
+      })
+
+      const blob = new Blob([res], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      triggerDownloadUrl(`operation_logs_${dateTag}.csv`, url)
+    } else {
+      res = await adminApi.exportLoginLogs({
+        username: searchForm.username,
+        beginTime: searchForm.beginTime,
+        endTime: searchForm.endTime,
+        loginStatus: searchForm.loginStatus
+      })
+
+      const blob = new Blob([res], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      triggerDownloadUrl(`login_logs_${dateTag}.csv`, url)
+    }
+
     ToastAlert.success({
       title: '导出成功',
       message: '日志文件已下载'

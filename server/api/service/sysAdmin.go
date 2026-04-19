@@ -23,6 +23,7 @@ import (
 	pkgRedis "server/pkg/redis"
 	"strings"
 	"time"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -168,6 +169,19 @@ func (s SysAdminServiceImpl) UpdatePersonalPassword(c *gin.Context, dto entity.U
 		result.Failed(c, int(result.ApiCode.RESETPASSWORD), result.ApiCode.GetMessage(result.ApiCode.RESETPASSWORD))
 		return
 	}
+
+	if dao.GetSysSettingBoolValue("security.force_strong_pwd", true) {
+		hasLower := regexp.MustCompile(`\[a-z]`).MatchString(dto.NewPassword)
+		hasUpper := regexp.MustCompile(`\[A-Z]`).MatchString(dto.NewPassword)
+		hasDigit := regexp.MustCompile(`\[0-9]`).MatchString(dto.NewPassword)
+		hasSpecial := regexp.MustCompile(`\[!@#$%^&*()_\-+={}\[\]|:;"'<>,.?/\\]`).MatchString(dto.NewPassword)
+
+		if len(dto.NewPassword) < 8 || !hasLower || !hasUpper || !hasDigit || !hasSpecial {
+			result.Failed(c, 500, "系统开启了强密码策略，新密码必须大于8位且包含大小写字母、数字及特殊符号")
+			return
+		}
+	}
+
 	dto.NewPassword = utils.EncryptionMd5(dto.NewPassword)
 	sysAdminUpdatePwd := dao.UpdatePersonalPassword(dto)
 	tokenString, _ := jwt.GenerateTokenByAdmin(sysAdminUpdatePwd)
@@ -269,6 +283,17 @@ func (s *SysAdminServiceImpl) Register(ctx context.Context, dto entity.RegisterD
 
 	if err := s.ValidateStruct(dto); err != nil {
 		return service.NewServiceResult(nil, err)
+	}
+
+	if dao.GetSysSettingBoolValue("security.force_strong_pwd", true) {
+		hasLower := regexp.MustCompile(`\[a-z]`).MatchString(dto.Password)
+		hasUpper := regexp.MustCompile(`\[A-Z]`).MatchString(dto.Password)
+		hasDigit := regexp.MustCompile(`\[0-9]`).MatchString(dto.Password)
+		hasSpecial := regexp.MustCompile(`\[!@#$%^&*()_\-+={}\[\]|:;"'<>,.?/\\]`).MatchString(dto.Password)
+
+		if len(dto.Password) < 8 || !hasLower || !hasUpper || !hasDigit || !hasSpecial {
+			return service.NewServiceResult(nil, errors.ValidationError("系统开启了强密码策略，密码必须大于8位且包含大小写字母、数字及特殊符号"))
+		}
 	}
 
 	if dto.Password != dto.ConfirmPassword {

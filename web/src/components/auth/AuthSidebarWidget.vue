@@ -4,8 +4,8 @@
  * @LastEditors: JimZhang
  * @LastEditTime: 2026-04-19 14:26:57
  * @FilePath: /web/src/components/auth/AuthSidebarWidget.vue
- * @Description: 
- * 
+ * @Description:
+ *
  */
 <template>
   <div class="mt-auto mb-6">
@@ -22,7 +22,7 @@
           <p class="text-xs text-gray-600 dark:text-gray-400">权限系统运行正常</p>
         </div>
       </div>
-      
+
       <!-- 状态指标 -->
       <div class="space-y-2">
         <div class="flex items-center justify-between text-xs">
@@ -135,11 +135,6 @@ const quickLinks = [
     name: '系统设置',
     path: '/auth/settings/basic',
     icon: SettingsIcon
-  },
-  {
-    name: '帮助文档',
-    path: '/help',
-    icon: InfoCircleIcon
   }
 ]
 
@@ -149,14 +144,14 @@ const refreshStats = async () => {
     // 这里可以调用API获取最新的系统状态
     // const response = await api.getSystemStats()
     // systemStats.value = response.data
-    
+
     // 模拟刷新
     systemStats.value = {
       onlineUsers: Math.floor(Math.random() * 20) + 5,
       activeSessions: Math.floor(Math.random() * 30) + 10,
       systemLoad: 'normal'
     }
-    
+
     ToastAlert.success({
       title: '刷新成功',
       message: '系统状态已更新'
@@ -171,8 +166,8 @@ const refreshStats = async () => {
 
 // 打开帮助文档
 const openHelp = () => {
-  // 可以打开新窗口或跳转到帮助页面
-  window.open('/help/auth-management', '_blank')
+  // 跳转到开源仓库
+  window.open('https://github.com/很拉风的James/general_go_vue_admin', '_blank')
 }
 
 // 联系技术支持

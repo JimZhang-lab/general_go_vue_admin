@@ -2,7 +2,7 @@
   <AuthLayout>
     <PageBreadcrumb pageTitle="字典管理" />
     <div class="space-y-4 sm:space-y-5 lg:flex lg:space-y-0 lg:space-x-5 h-[calc(100vh-140px)]">
-      
+
       <!-- 左侧：字典类型 -->
       <AuthCard title="字典分类" class="lg:w-1/3 flex flex-col h-full overflow-hidden">
         <div class="mb-4 flex space-x-2">
@@ -18,7 +18,7 @@
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
           </button>
         </div>
-        
+
         <div class="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2 relative">
           <div v-if="loadingTypes" class="flex justify-center py-8 text-gray-500">
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 拼命加载中...
@@ -27,8 +27,8 @@
             暂无字典分类
           </div>
           <ul v-else class="space-y-2">
-            <li 
-              v-for="type in dictTypeList" 
+            <li
+              v-for="type in dictTypeList"
               :key="type.id"
               @click="selectDictType(type)"
               :class="[ 'p-3 rounded-xl border cursor-pointer transition-all duration-200 group relative', selectedDictType?.id === type.id ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10' : 'border-gray-100 hover:border-blue-200 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50' ]"
@@ -38,7 +38,7 @@
                 <span :class="type.status === '1' ? 'bg-success-100 text-success-700' : 'bg-error-100 text-error-700'" class="text-[10px] px-1.5 rounded-full">{{ type.status === '1' ? '正常' : '停用' }}</span>
               </div>
               <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 font-mono">{{ type.dictType }}</div>
-              
+
               <!-- Hover Actions -->
               <div class="absolute right-2 top-1/2 -translate-y-1/2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm p-1 rounded-lg shadow-sm" v-if="selectedDictType?.id !== type.id">
                 <button @click.stop="editDictType(type)" class="text-blue-600 hover:bg-blue-50 p-1 rounded"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
@@ -72,29 +72,29 @@
               <table class="min-w-full relative">
                 <thead class="sticky top-0 bg-gray-50/90 dark:bg-gray-800/90 backdrop-blur z-10 shadow-sm">
                   <tr class="border-b border-gray-200 dark:border-gray-700">
-                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-xs tracking-wider">标签展现 (Label)</th>
-                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-xs tracking-wider">底层键值 (Value)</th>
-                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-xs tracking-wider">排序</th>
-                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-xs tracking-wider">状态</th>
-                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-xs tracking-wider">操作</th>
+                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">标签展现 (Label)</th>
+                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">底层键值 (Value)</th>
+                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">排序</th>
+                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">状态</th>
+                    <th class="px-5 py-3 text-left font-medium text-gray-500 text-theme-xs dark:text-gray-400">操作</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-transparent">
                   <tr v-if="loadingData"><td colspan="5" class="py-8 text-center text-gray-400">正在获取数据...</td></tr>
                   <tr v-else-if="dictDataList.length === 0"><td colspan="5" class="py-8 text-center text-gray-400">该分类下暂无数据项配置</td></tr>
                   <tr v-else v-for="item in dictDataList" :key="item.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                    <td class="px-5 py-3 text-sm text-gray-800 dark:text-gray-200 font-medium">{{ item.dictLabel }}</td>
-                    <td class="px-5 py-3 text-sm font-mono text-blue-600 dark:text-blue-400">
+                    <td class="px-5 py-4 text-theme-sm text-gray-800 dark:text-gray-200 font-medium">{{ item.dictLabel }}</td>
+                    <td class="px-5 py-4 text-theme-sm font-mono text-blue-600 dark:text-blue-400">
                       <span class="bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">{{ item.dictValue }}</span>
                     </td>
-                    <td class="px-5 py-3 text-sm text-gray-500">{{ item.dictSort }}</td>
-                    <td class="px-5 py-3 text-sm">
-                      <span :class="item.status === '1' ? 'text-green-600 bg-green-50 px-2 py-1 rounded-md' : 'text-gray-500 bg-gray-100 px-2 py-1 rounded-md'">{{ item.status === '1' ? '启用' : '禁用' }}</span>
+                    <td class="px-5 py-4 text-theme-sm text-gray-500 dark:text-gray-400">{{ item.dictSort }}</td>
+                    <td class="px-5 py-4 text-theme-sm">
+                      <span :class="item.status === '1' ? 'bg-success-50 text-success-700 dark:bg-success-500/15 dark:text-success-500' : 'bg-error-50 text-error-700 dark:bg-error-500/15 dark:text-error-500'" class="rounded-full px-2 py-0.5 text-theme-xs font-medium">{{ item.status === '1' ? '启用' : '禁用' }}</span>
                     </td>
-                    <td class="px-5 py-3 text-sm">
+                    <td class="px-5 py-4 text-theme-sm">
                       <div class="flex gap-2">
-                        <button @click="editDictData(item)" class="text-blue-500 hover:text-blue-700">编辑</button>
-                        <button @click="deleteDictData(item)" class="text-red-500 hover:text-red-700">删除</button>
+                        <button @click="editDictData(item)" class="inline-flex items-center px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 dark:bg-blue-500/15 dark:text-blue-400 dark:hover:bg-blue-500/25">编辑</button>
+                        <button @click="deleteDictData(item)" class="inline-flex items-center px-2 py-1 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 dark:bg-red-500/15 dark:text-red-400 dark:hover:bg-red-500/25">删除</button>
                       </div>
                     </td>
                   </tr>
@@ -103,7 +103,7 @@
             </div>
           </div>
         </template>
-        
+
         <!-- 空状态 SVG -->
         <div v-else class="flex-1 flex flex-col items-center justify-center text-gray-400 opacity-60">
           <svg class="w-32 h-32 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
@@ -303,7 +303,7 @@ const getDictDataList = async () => {
   loadingData.value = true
   try {
     const res: any = await dictApi.getDictDataList({
-      pageNum: 1, pageSize: 999, 
+      pageNum: 1, pageSize: 999,
       dictType: selectedDictType.value.dictType,
       dictLabel: dataSearchForm.dictLabel
     })
@@ -321,7 +321,7 @@ const submitDataForm = async () => {
   try {
     if (!selectedDictType.value) return
     dataForm.dictType = selectedDictType.value.dictType
-    
+
     const apiMethod = showAddDataModal.value ? dictApi.addDictData : dictApi.updateDictData
     const res: any = await apiMethod(dataForm)
     if (res.data.code === 200) {

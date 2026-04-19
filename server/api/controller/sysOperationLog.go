@@ -39,6 +39,23 @@ func GetSysOperationLogList(c *gin.Context) {
 	service.SysOperationLogService().GetSysOperationLogList(c, Username, BeginTime, EndTime, PageSize, PageNum)
 }
 
+// 导出操作日志
+// @Summary 导出操作日志接口
+// @Produce json
+// @Description 导出操作日志接口
+// @Param username query string false "用户名"
+// @Param beginTime query string false "开始时间"
+// @Param endTime query string false "结束时间"
+// @Success 200 {object} result.Result
+// @router /api/sysOperationLog/export [get]
+// @Security ApiKeyAuth
+func ExportSysOperationLog(c *gin.Context) {
+	Username := c.Query("username")
+	BeginTime := c.Query("beginTime")
+	EndTime := c.Query("endTime")
+	service.SysOperationLogService().ExportSysOperationLogList(c, Username, BeginTime, EndTime)
+}
+
 // 根据id删除操作日志
 // @Summary 根据id删除操作日志
 // @Produce json
