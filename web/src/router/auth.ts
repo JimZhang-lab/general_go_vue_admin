@@ -133,6 +133,30 @@ export const authRoutes: RouteConfig[] = [
         beforeEnter: routeGuards.requireAuth
       },
       {
+        path: 'dept',
+        name: 'DeptManagement',
+        component: () => import('@/views/Auth/DeptManagement.vue'),
+        meta: {
+          title: '部门管理',
+          icon: 'office-building',
+          requiresAuth: true,
+          permissions: ['system:dept:list']
+        },
+        beforeEnter: routeGuards.requireAuth
+      },
+      {
+        path: 'post',
+        name: 'PostManagement',
+        component: () => import('@/views/Auth/PostManagement.vue'),
+        meta: {
+          title: '岗位管理',
+          icon: 'briefcase',
+          requiresAuth: true,
+          permissions: ['system:post:list']
+        },
+        beforeEnter: routeGuards.requireAuth
+      },
+      {
         path: 'profile',
         name: 'AuthProfile',
         component: () => import('@/views/Auth/Profile.vue'),

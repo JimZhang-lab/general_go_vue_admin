@@ -231,6 +231,18 @@ const authMenuGroups = [
         permissions: ["system:menu:list"],
       },
       {
+        icon: UserGroupIcon,
+        name: "部门管理",
+        path: "/auth/dept",
+        permissions: ["system:dept:list"],
+      },
+      {
+        icon: UserCircleIcon,
+        name: "岗位管理",
+        path: "/auth/post",
+        permissions: ["system:post:list"],
+      },
+      {
         icon: DocsIcon,
         name: "系统日志",
         path: "/auth/logs",
