@@ -1,2 +1,0 @@
-{"level":"info","ts":"2026-04-19T22:22:34.236+0800","caller":"server/main.go:53","msg":"Listening and serving HTTP on 127.0.0.1:8368"}
-{"level":"info","ts":"2026-04-19T22:22:43.338+0800","caller":"server/main.go:53","msg":"Listening and serving HTTP on 127.0.0.1:8368"}

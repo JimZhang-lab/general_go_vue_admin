@@ -1,4 +1,0 @@
-{"level":"info","ts":"2026-04-19T20:24:01.528+0800","caller":"server/main.go:53","msg":"Listening and serving HTTP on 127.0.0.1:8368"}
-{"level":"info","ts":"2026-04-19T20:24:19.653+0800","caller":"server/main.go:53","msg":"Listening and serving HTTP on 127.0.0.1:8368"}
-{"level":"info","ts":"2026-04-19T20:24:29.338+0800","caller":"server/main.go:53","msg":"Listening and serving HTTP on 127.0.0.1:8368"}
-{"level":"info","ts":"2026-04-19T20:24:39.948+0800","caller":"server/main.go:53","msg":"Listening and serving HTTP on 127.0.0.1:8368"}
