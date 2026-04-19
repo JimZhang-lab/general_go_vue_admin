@@ -157,6 +157,18 @@ export const authRoutes: RouteConfig[] = [
         beforeEnter: routeGuards.requireAuth
       },
       {
+        path: 'dict',
+        name: 'DataDictionary',
+        component: () => import('@/views/Auth/DataDictionary.vue'),
+        meta: {
+          title: '数据字典',
+          icon: 'book',
+          requiresAuth: true,
+          permissions: ['system:dict:list']
+        },
+        beforeEnter: routeGuards.requireAuth
+      },
+      {
         path: 'profile',
         name: 'AuthProfile',
         component: () => import('@/views/Auth/Profile.vue'),
@@ -165,6 +177,18 @@ export const authRoutes: RouteConfig[] = [
           icon: 'user-circle',
           requiresAuth: true,
           hideInMenu: false
+        },
+        beforeEnter: routeGuards.requireAuth
+      },
+      {
+        path: 'monitor',
+        name: 'ServerMonitor',
+        component: () => import('@/views/Auth/ServerMonitor.vue'),
+        meta: {
+          title: '系统监控',
+          icon: 'server',
+          requiresAuth: true,
+          permissions: ['system:monitor:list']
         },
         beforeEnter: routeGuards.requireAuth
       },

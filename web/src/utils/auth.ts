@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/utils/auth.ts
+ * @Description: 
+ * 
+ */
 import storage from './storage'
 import { useMainStore } from '@/store'
 
@@ -129,14 +138,9 @@ export class AuthUtils {
     storage.setItem('keepLoggedIn', keep.toString())
   }
   
-  /**
-   * 刷新用户会话
-   * 如果启用了"保持登录"，则延长会话时间
-   */
   static refreshSession(): void {
-    if (this.isKeepLoggedIn() && this.isAuthenticated()) {
-      // 这里可以调用后端 API 刷新 token
-      // 暂时只更新本地时间戳
+    if (this.isAuthenticated()) {
+      // 无论是否选中"保持登录"，当前活动状态都必须被更新，否则过期会拦截正常的跳转
       const timestamp = Date.now().toString()
       storage.setItem('lastActivity', timestamp)
     }

@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/icons/SendIcon.vue
+ * @Description: 
+ * 
+ */
 <template>
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path

@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/auth/AuthLayout.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="min-h-screen xl:flex bg-gray-50 dark:bg-gray-900">
     <!-- 侧边栏 -->
@@ -13,6 +22,9 @@
     >
       <!-- 头部 -->
       <AuthHeader />
+
+      <!-- 顶部标签页 (多页签) -->
+      <TagsView />
 
       <!-- 主内容 -->
       <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
@@ -34,6 +46,7 @@ import { useSidebar } from '@/composables/useSidebar'
 import AuthSidebar from './AuthSidebar.vue'
 import AuthHeader from './AuthHeader.vue'
 import Backdrop from '@/components/layout/Backdrop.vue'
+import TagsView from '@/components/common/TagsView.vue'
 
 const { isExpanded, isHovered, isMobileOpen, closeMobileSidebar } = useSidebar()
 </script>

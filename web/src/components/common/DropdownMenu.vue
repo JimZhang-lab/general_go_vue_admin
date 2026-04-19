@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/common/DropdownMenu.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="relative" v-click-outside="closeDropdown" ref="dropdown">
     <!-- Dropdown Trigger Button -->

@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/SessionManager.vue
+ * @Description: 
+ * 
+ */
 <template>
   <!-- 会话管理组件，无UI，仅处理会话逻辑 -->
 </template>

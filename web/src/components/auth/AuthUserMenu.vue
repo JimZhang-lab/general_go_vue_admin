@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/auth/AuthUserMenu.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="relative" ref="dropdownRef">
     <!-- 用户按钮 -->

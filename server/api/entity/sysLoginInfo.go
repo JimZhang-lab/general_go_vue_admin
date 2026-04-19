@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /server/api/entity/sysLoginInfo.go
+ * @Description: 
+ * 
+ */
 package entity
 
 import "server/common/utils"

@@ -141,5 +141,19 @@ func regsiterAdminPlatformRouter(router *gin.Engine) {
 		jwtGroup.DELETE("/notice/batch/delete", middleware.PermissionMiddleware("system:notice:delete"), controller.BatchDeleteSysNotice)
 		jwtGroup.PUT("/notice/read", controller.MarkSysNoticeRead)
 		jwtGroup.PUT("/notice/readAll", controller.MarkAllSysNoticeRead)
+
+		// 字典管理路由
+		jwtGroup.GET("/dict/type/list", middleware.PermissionMiddleware("system:dict:list"), controller.GetDictTypeList)
+		jwtGroup.POST("/dict/type/add", middleware.PermissionMiddleware("system:dict:add"), controller.AddDictType)
+		jwtGroup.PUT("/dict/type/update", middleware.PermissionMiddleware("system:dict:update"), controller.UpdateDictType)
+		jwtGroup.DELETE("/dict/type/delete", middleware.PermissionMiddleware("system:dict:delete"), controller.DeleteDictType)
+
+		jwtGroup.GET("/dict/data/list", middleware.PermissionMiddleware("system:dict:list"), controller.GetDictDataList)
+		jwtGroup.POST("/dict/data/add", middleware.PermissionMiddleware("system:dict:add"), controller.AddDictData)
+		jwtGroup.PUT("/dict/data/update", middleware.PermissionMiddleware("system:dict:update"), controller.UpdateDictData)
+		jwtGroup.DELETE("/dict/data/delete", middleware.PermissionMiddleware("system:dict:delete"), controller.DeleteDictData)
+
+		// 系统监控路由
+		jwtGroup.GET("/monitor/server", controller.GetServerMonitorInfo)
 	}
 }

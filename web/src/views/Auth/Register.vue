@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/views/Auth/Register.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#ecfbff] via-[#f3f8ff] to-[#e7f1ff]">
     <div class="pointer-events-none absolute inset-0">

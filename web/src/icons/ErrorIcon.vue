@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/icons/ErrorIcon.vue
+ * @Description: 
+ * 
+ */
 <template>
   <svg
     className="fill-current"

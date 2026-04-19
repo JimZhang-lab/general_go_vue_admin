@@ -66,6 +66,8 @@ func SetupDBLink() error {
 		&entity.SysSetting{},
 		&entity.SysNotice{},
 		&entity.SysNoticeRead{},
+		&entity.SysDictType{},
+		&entity.SysDictData{},
 	)
 	if err != nil {
 		return err

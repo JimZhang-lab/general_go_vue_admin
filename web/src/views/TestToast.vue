@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/views/TestToast.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="p-8 space-y-4">
     <h1 class="text-2xl font-bold mb-6">Toast 测试页面</h1>

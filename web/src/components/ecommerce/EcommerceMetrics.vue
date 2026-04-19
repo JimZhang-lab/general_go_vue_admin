@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/ecommerce/EcommerceMetrics.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
     <div

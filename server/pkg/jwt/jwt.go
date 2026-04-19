@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /server/pkg/jwt/jwt.go
+ * @Description: 
+ * 
+ */
 // JWT工具类(生成token,解析token,获取当前登录的用户id及用户信息)
 package jwt
 

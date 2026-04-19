@@ -9,8 +9,11 @@
 package log
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"time"
+
 	"server/common/config"
 
 	"go.uber.org/zap"
@@ -45,7 +48,19 @@ func newZapLogger() *zap.SugaredLogger {
 	var ws zapcore.WriteSyncer
 	if logCfg.Model == "file" {
 		ensureDir(logCfg.Path)
-		filePath := filepath.Join(logCfg.Path, logCfg.Name)
+		// 解析基础名称并附加当前时间戳 sys_202604191429.log
+		currentTime := time.Now().Format("200601021504")
+		ext := filepath.Ext(logCfg.Name)
+		nameWithoutExt := logCfg.Name[0 : len(logCfg.Name)-len(ext)]
+		if ext == "" {
+			ext = ".log"
+		}
+		if nameWithoutExt == "" {
+			nameWithoutExt = "sys"
+		}
+		finalName := fmt.Sprintf("%s_%s%s", nameWithoutExt, currentTime, ext)
+		
+		filePath := filepath.Join(logCfg.Path, finalName)
 		ws = zapcore.AddSync(&lumberjack.Logger{
 			Filename:   filePath,
 			MaxSize:    logCfg.MaxSize, // MB

@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/views/Auth/LogoutTest.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="p-6 space-y-6">
     <div class="bg-white rounded-lg shadow-lg p-6 dark:bg-gray-800">

@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/charts/BarChart/BarChartOne.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="max-w-full overflow-x-auto custom-scrollbar">
     <div id="chartOne" class="-ml-5 min-w-[650px] xl:min-w-full pl-2">

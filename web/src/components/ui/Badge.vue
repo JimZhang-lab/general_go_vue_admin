@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/ui/Badge.vue
+ * @Description: 
+ * 
+ */
 <template>
   <span :class="[baseStyles, sizeClass, colorStyles]">
     <span v-if="startIcon" class="mr-1">

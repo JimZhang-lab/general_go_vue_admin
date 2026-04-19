@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/utils/authForms.ts
+ * @Description: 
+ * 
+ */
 export const USERNAME_PATTERN = /^[A-Za-z0-9_]{4,20}$/
 export const PHONE_PATTERN = /^1[3-9]\d{9}$/
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/

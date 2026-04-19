@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/ui/Alert.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div :class="['rounded-xl border p-4', variantClasses[variant].container]">
     <div class="flex items-start gap-3">

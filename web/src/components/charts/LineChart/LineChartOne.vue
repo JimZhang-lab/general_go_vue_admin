@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/charts/LineChart/LineChartOne.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="max-w-full overflow-x-auto custom-scrollbar">
     <div id="chartThree" class="-ml-4 min-w-[1000px] xl:min-w-full pl-2">

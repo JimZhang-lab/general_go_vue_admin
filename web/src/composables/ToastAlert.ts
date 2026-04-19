@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/composables/ToastAlert.ts
+ * @Description: 
+ * 
+ */
 import { createVNode, render } from 'vue'
 import type { VNode } from 'vue'
 import Toast from '@/components/ui/Toast.vue'

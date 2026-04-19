@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/views/Auth/Login.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="relative min-h-screen overflow-hidden bg-gradient-to-br from-[#ecfbff] via-[#f3f8ff] to-[#e7f1ff]">
     <div class="pointer-events-none absolute inset-0">
@@ -225,10 +234,14 @@
 
               <div class="flex flex-col gap-3 border-t border-slate-100 pt-1 sm:flex-row sm:items-center sm:justify-between">
                 <label class="inline-flex cursor-pointer items-center gap-3 text-sm text-slate-600">
-                  <input v-model="rememberMe" type="checkbox" class="peer sr-only" />
-                  <span class="flex h-5 w-5 items-center justify-center rounded border border-slate-300 bg-white shadow-sm transition peer-checked:border-cyan-500">
+                  <input v-model="rememberMe" type="checkbox" class="sr-only" />
+                  <span 
+                    class="flex h-5 w-5 items-center justify-center rounded border shadow-sm transition"
+                    :class="rememberMe ? 'border-cyan-500 bg-cyan-50' : 'border-slate-300 bg-white'"
+                  >
                     <svg
-                      class="h-3.5 w-3.5 text-cyan-600 opacity-0 transition peer-checked:opacity-100"
+                      class="h-3.5 w-3.5 text-cyan-600 transition"
+                      :class="rememberMe ? 'opacity-100' : 'opacity-0'"
                       viewBox="0 0 14 14"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -356,7 +369,7 @@ const validateField = (field: LoginField) => {
     },
     password: () => {
       if (!loginForm.password) return '请输入密码'
-      if (!PASSWORD_PATTERN.test(loginForm.password)) return '密码需至少 6 位，且包含字母和数字'
+      if (loginForm.password.length < 6) return '密码需至少 6 位'
       return ''
     },
     captcha: () => {

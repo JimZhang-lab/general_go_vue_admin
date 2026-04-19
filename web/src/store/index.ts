@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/store/index.ts
+ * @Description: 
+ * 
+ */
 import { defineStore } from 'pinia'
 import storage from '@/utils/storage'
 

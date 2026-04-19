@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/views/Ecommerce.vue
+ * @Description: 
+ * 
+ */
 <template>
   <admin-layout>
     <div class="grid grid-cols-12 gap-4 md:gap-6">

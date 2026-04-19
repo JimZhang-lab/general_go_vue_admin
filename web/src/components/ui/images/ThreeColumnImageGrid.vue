@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/ui/images/ThreeColumnImageGrid.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
     <div v-for="(image, index) in images" :key="index">

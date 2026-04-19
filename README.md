@@ -1,91 +1,93 @@
-# 通用后台管理系统 (General Go-Vue Admin)
+# General Go Vue Admin
 
-这是一个基于现代化技术栈开发的企业级通用后台管理系统。系统采纳前后端分离架构，专注于高可维护性、最佳实践与优美的界面交互。本系统内置了完善的角色权限控制 (RBAC)、动态路由菜单、精美的数据可视化概览面板以及完整的管理员与系统日志管理模块。
+## Project Description
 
-## 🛠️ 技术栈 (Tech Stack)
+General Go Vue Admin is an enterprise-grade backend management system designed to provide a robust, scalable, and highly performant architecture. It implements a strict separation of frontend and backend environments. The backend is built on the Go language utilizing the Gin web framework and GORM for database interactions. The frontend leverages Vue 3, Composition API, TypeScript, Vite, and Tailwind CSS to deliver an optimal and highly responsive user interface featuring modern Glassmorphism aesthetics.
 
-### 前端生态 (Frontend)
-- **核心框架**: Vue 3 (Composition API) 
-- **构建工具**: Vite 7
-- **类型系统**: TypeScript
-- **状态管理**: Pinia
-- **路由控制**: Vue Router 4 (支持动态路由与权限拦截)
-- **UI 样式**: Tailwind CSS v4, DaisyUI, 现代玻璃拟物态(Glassmorphism)设计
-- **第三方组件**:
-  - `axios` 统一网络请求封装与拦截
-  - `ApexCharts` 动态数据可视化图表
-  - `lucide-vue-next` 与 `heroicons` 提供海量精美矢量图
+This system is engineered for stability and security, incorporating high-concurrency capabilities, dynamic role-based access control (RBAC), and persistent state management, making it an ideal foundation for complex business applications.
 
-### 后端生态 (Backend)
-- **核心框架**: Golang (1.20+)
-- **Web 框架**: Gin (高性能路由分发)
-- **ORM 映射**: GORM (兼容 MySQL)
-- **认证授权**: JWT (JSON Web Token)
-- **实时热更**: Air (开发环境自动化平滑重载)
-- **数据库**: MySQL 8.x + Redis (可选，用于缓存)
+## Core Features
 
----
+- **Dynamic RBAC Authorization**: Granular control over permissions and data access based on hierarchical Roles, Departments, and Posts.
+- **Frontend-Backend Decoupling**: API-first design using standard RESTful interfaces with JWT-based stateless authentication.
+- **Micro-Frontend Architecture**: Multi-tab (TagsView) keep-alive navigation caching ensures operational state is preserved across route transitions.
+- **System Administration Modules**: Comprehensive modules for User, Role, Menu, Department, and Post management.
+- **Data Dictionary System**: Flexible configuration layer for mapping business variables internally without hardcoded values.
+- **Operation Audit Trails**: Detailed and automated logging of system events, logins, and API mutations.
+- **High Concurrency Stability**: Built-in concurrency managers, rate limiters, timeout wrappers, and circuit breakers mapped at the middleware routing layer.
 
-## 🌟 核心特性 (Features)
+## Technology Stack
 
-1. **动态菜单与权限 (RBAC)**
-   - 细粒度的路由守卫拦截
-   - 根据用户角色和后端配置动态渲染侧边栏菜单
-   - 指令级 (`v-permission`, `v-role`) 前端按钮权限控制
-2. **极佳的视觉与动效体验**
-   - 适配深色模式 (Dark Mode) 与亮色模式无缝切换
-   - Tailwind 提供的响应式系统，完美适配桌面与移动端设备
-3. **完备的基础运维功能**
-   - 多级管理员账号与组织架构支持
-   - 用户登入、登出行为跟踪及系统操作日志记录
-4. **性能极致优化**
-   - 后端针对关键登录和资源获取接口做了并发查询优化 (`goroutines`)
-   - 彻底修复 GORM 模型校验问题与 JWT 失效逻辑
+### Backend
+- **Go**: Version 1.22+
+- **Gin**: High-performance HTTP web framework
+- **GORM**: Object-Relational Mapping framework
+- **MySQL**: Relational database storage
+- **Redis**: In-memory data store for caching and queues
+- **JWT**: Token-based authentication
 
----
+### Frontend
+- **Vue 3**: Reactive UI framework focusing on the Composition API
+- **Vite**: Next-generation frontend tooling and bundler
+- **TypeScript**: Static typing for structural soundness
+- **Pinia**: Intuitive and type-safe state management
+- **Tailwind CSS**: Utility-first CSS framework for rapid UI styling
+- **Vue Router**: Official routing with dynamic permission tree integration
 
-## 🚀 快速启动 (Getting Started)
+## Development Environment Setup
 
-### 1. 后端服务 (Go Server)
-确保本地已安装 Go 环境以及相关数据库，然后修改 `server/config.yaml` 填入您的 MySQL 账号密码。
+### Prerequisites
+- Go 1.22 or higher
+- Node.js 18 or higher
+- MySQL 8.0 or higher
+- Redis 6.0 or higher
+- Yarn or npm package manager
 
-```bash
-cd server
-# 下载相关包
-go mod tidy
+### Backend Initialization
+1. Navigate to the server directory:
+   `cd server`
+2. Duplicate the configuration template and establish database credentials:
+   `cp config.yaml.example config.yaml`
+3. Download Go modules:
+   `go mod tidy`
+4. Start the backend service using Air (for live-reloading) or Go:
+   `air` or `go run main.go`
 
-# （推荐）使用 air 进行热重载开发
-go install github.com/air-verse/air@latest
-air
+### Frontend Initialization
+1. Navigate to the frontend directory:
+   `cd web`
+2. Install package dependencies:
+   `yarn install` or `npm install`
+3. Start the Vite development server:
+   `yarn dev` or `npm run dev`
 
-# 普通运行
-go run main.go
-```
-*后端访问接口默认跑在 `http://127.0.0.1:8368`。*
+## Deployment
 
-### 2. 前端服务 (Vue Web)
-确保本地已安装 Node.js(推荐 v20+) 与 Vite。
+For production deployment, ensure the frontend is compiled into static assets and the Go application is built into a standalone binary.
 
-```bash
-cd web
-# 安装依赖
-npm install  # 或 yarn install
+1. Build the frontend:
+   `cd web`
+   `yarn build`
+   This will generate a `dist` directory. Serve these files via Nginx or equivalent web servers.
+2. Build the backend:
+   `cd server`
+   `GOOS=linux GOARCH=amd64 go build -o server main.go`
 
-# 启动冷更服务
-npm run dev  # 或 yarn dev
-```
-*前端默认跑在 `http://localhost:3000`，内置 proxy 配置会自动将 `/api` 请求代理至后端。*
+## Directory Structure Overview
 
----
+- `/server`
+  - `/api`: Contains Controller, Service, DAO, and Entity definitions.
+  - `/common`: Configuration loading, constants, and structured response formatters.
+  - `/middleware`: Authentication, CORS, logging, and concurrency middlewares.
+  - `/pkg`: Extended utilities and plugins (Database, Redis, JWT encapsulation).
+  - `/router`: Centralized route multiplexing and handlers.
+- `/web`
+  - `/src/api`: Unified API endpoint wrappers mapping to the backend.
+  - `/src/components`: Reusable UI components including foundational layouts and widgets.
+  - `/src/router`: Frontend routing arrays with navigation guards.
+  - `/src/stores`: Pinia states definitions for user profile, authentication, and Multi-Tab tags.
+  - `/src/views`: Domain-specific pages and modular templates.
 
-## 🛡️ 近期优化与 Bug Fixes (Changelog)
+## License
 
-- **[修复]** 修复了 Vue Router 4 内部由相同 `name: 'Profile'` 导致的配置层隐式冲突覆盖，解决了点击个人资料菜单后白屏并提示 "No match found" 的致命 Bug。
-- **[修复]** 重构后端 `server/pkg/jwt/jwt.go` 全局变量初始化陷阱，确保下发的 Token 根据最新 Config 热载入实时计算到期时间，根除“前端收到 Token 却立刻被识别伪过期”从而陷入认证死循环无法跳转 dashboard 的疑难杂症。
-- **[修复]** 修正了 GORM 在扫描包含 slice 非映射字段 `LeftMenuVo.MenuSvoList` 时的结构体解析 panic。
-- **[优化]** 清理了 `AuthUserMenu` 中未挂载的空连结（如 `/help`）。
-
----
-
-## 📝 开源协议
-MIT License.
+This project operates under the constraints defined within the workspace and is intended for internal commercial deployment architectures.

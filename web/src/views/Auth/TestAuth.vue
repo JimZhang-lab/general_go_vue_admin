@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/views/Auth/TestAuth.vue
+ * @Description: 
+ * 
+ */
 <template>
   <AdminLayout>
     <div class="space-y-6">

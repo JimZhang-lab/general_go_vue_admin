@@ -1,3 +1,12 @@
+/*
+ * @Author: JimZhang
+ * @Date: 2026-04-19 14:26:57
+ * @LastEditors: JimZhang
+ * @LastEditTime: 2026-04-19 14:26:57
+ * @FilePath: /web/src/components/ui/Modal.vue
+ * @Description: 
+ * 
+ */
 <template>
   <div class="fixed inset-0 flex items-center justify-center overflow-y-auto z-99999">
     <div
